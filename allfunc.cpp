@@ -307,7 +307,7 @@ void output(struct record* head)
 	record* p, * q;
 	p = head; q = p->next;
 	int x; x = 0;
-	while (p!= NULL)
+	while (p->next!=NULL)
 	{
 		x = x + 1;
 		printf("%d ", x);
@@ -327,9 +327,11 @@ void output(struct record* head)
 		}
 		printf("%d  %d ", p->tre.hos.time_start, p->tre.hos.time_end);//输出住,出院时间
 		printf("%d %d %d\n", p->tre.hos.days_hos, p->tre.hos.cost_hos, p->tre.hos.deposit);//输出住院天数,住院费用,住院押金
-		p = p->next; 
-		if(q!=NULL)
-			q = q->next;
+		if (p->next== NULL)
+			return;
+		else
+			p = p->next; 
+		
 	}
 	return;
 }

@@ -14,7 +14,7 @@ FILE* infile;																//源文件为infile，更改后的输出文件为outfile
 
 *********************************/
 int openfile() {															//文件读入函数
-	infile = fopen("test.txt", "a");							//读取文件并判断是否成功打开
+	infile = fopen("test.txt", "r");							//读取文件并判断是否成功打开
 	if (infile == NULL)
 	{
 		printf("文件打开失败！请检查源文件！\n");		//打开失败结束并返回上层
@@ -26,52 +26,90 @@ int openfile() {															//文件读入函数
 		return 1;
 	}
 }
+//DiagnosisRecord* ReadFromDiagnosisFile(const char* readPath) {
+//	DiagnosisRecord* res = (DiagnosisRecord*)malloc(sizeof(DiagnosisRecord));
+//	res->next = NULL;
+//	FILE* fileReadPointer;
+//	if ((fileReadPointer = fopen(readPath, "r")) == NULL) {
+//		printf("文件路径不正确,请重新输入!\n");
+//		return NULL;
+//	}
+//	while (!feof(fileReadPointer)) {
+//		//printf("开始读入\n");
+//		DiagnosisRecord* nowRecord = InRecord(fileReadPointer);
+//		//printf("读入结束\n");
+//		if (!nowRecord) continue;
+//		pushBackDiagnosisList(res, nowRecord);
+//		if (nowRecord->diagnosisSituation.setFlag == 0) {
+//			hospitalFund.checkCost.yuan += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.checkRecord.totalCost.yuan;
+//			hospitalFund.checkCost.jiao += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.checkRecord.totalCost.jiao;
+//			hospitalFund.checkCost.fen += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.checkRecord.totalCost.fen;
+//		}
+//		else if (nowRecord->diagnosisSituation.setFlag == 1) {
+//			hospitalFund.drugCost.yuan += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.prescribeRecord.totalCost.yuan;
+//			hospitalFund.drugCost.jiao += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.prescribeRecord.totalCost.jiao;
+//			hospitalFund.drugCost.fen += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.prescribeRecord.totalCost.fen;
+//		}
+//		else if (nowRecord->diagnosisSituation.setFlag == 2) {
+//			hospitalFund.inHosipitalCost.yuan += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.inHospitalRecord.costByNow.yuan;
+//			hospitalFund.inHosipitalCost.jiao += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.inHospitalRecord.costByNow.jiao;
+//			hospitalFund.inHosipitalCost.fen += nowRecord->diagnosisSituation.
+//				diagnosisSituationInfo.inHospitalRecord.costByNow.fen;
+//		}
+//	}
+//	int CF = 0;//进位寄存器
+//	hospitalFund.allCost.fen += hospitalFund.checkCost.fen +
+//		hospitalFund.drugCost.fen + hospitalFund.inHosipitalCost.fen;
+//	CF = hospitalFund.allCost.fen / 10; hospitalFund.allCost.fen %= 10;
+//	hospitalFund.allCost.jiao += hospitalFund.checkCost.jiao +
+//		hospitalFund.drugCost.jiao + hospitalFund.inHosipitalCost.jiao + CF;
+//	CF = hospitalFund.allCost.jiao / 10; hospitalFund.allCost.jiao %= 10;
+//	hospitalFund.allCost.yuan += hospitalFund.checkCost.yuan +
+//		hospitalFund.drugCost.yuan + hospitalFund.inHosipitalCost.yuan + CF;
+//	fclose(fileReadPointer);
+//	return res;
+//}
 record* read_and_link() 
 {
-	//record* rec_head;
-
-	/***********************************************************
-
-	注意：格式化读入时，是否需要过滤回车？有待进一步测试
-
-	************************************************************/
-
-
 	record* rec_head = (record*)malloc(sizeof(record));		//建立头节点
-	//rec_head->next = NULL;
-	//record* rec_this = rec_head;								//建立当前节点
-	//record* tp;
 	record* tp;
-		//= (record*)malloc(sizeof(record));//默认建立新节点
-	//rec_head->next = tp;
 	tp = rec_head;
-	while (fscanf(infile, "%d", &tp->num_check) !=EOF)																//循环读入直至文件末尾
+	int x = 0;
+	while (!feof(infile))																//循环读入直至文件末尾
 	{
-		//tp = (record*)malloc(sizeof(record));//默认建立新节点
+		x++;
+		fscanf(infile, "%d", &tp->num_check);
 		fscanf(infile, "%s%d%d"
-			, &tp->pat.name_pat
+			, tp->pat.name_pat
 			, &tp->pat.age
 			, &tp->pat.tag_pat);
 		fscanf(infile, "%s%s%s%d"
-			, &tp->doc.name_doc
-			, &tp->doc.level
-			, &tp->doc.sub
+			, tp->doc.name_doc
+			, tp->doc.level
+			, tp->doc.sub
 			, &tp->doc.num_work);
 		fscanf(infile, "%s", tp->out_doc);
-			//fscanf(infile, "%s", tp->tre.che.type[0]);
 		int i = 0, j = 0;
-		while(1)//在读至over之前，循环读入检查项目名称与费用
+		while(1)
 		{
 			fscanf(infile, "%s", tp->tre.che.type[i]);
-			if(strcmp("over", tp->tre.che.type[i]) != 0)
+			if(strcmp("over", tp->tre.che.type[i]) == 0)
 				break;
-			fscanf(infile, "%f", tp->tre.che.cost_term[i]);
+			fscanf(infile, "%f", &tp->tre.che.cost_term[i]);
 			i++;
 		}
 		while(1)//在读至over之前，循环读入药品单价与数量
 		{
-			fscanf(infile, "%s", &tp->tre.pil.name_pill[j]);
-			if (strcmp("over", tp->tre.pil.name_pill[j]) != 0)
+			fscanf(infile, "%s", tp->tre.pil.name_pill[j]);
+			if (strcmp("over", tp->tre.pil.name_pill[j]) == 0)
 				break;
 			fscanf(infile, "%d%d"
 				, &tp->tre.pil.cost_perpill[j]
@@ -85,10 +123,15 @@ record* read_and_link()
 	
 		tp->next = (record*)malloc(sizeof(struct record));
 		tp = tp->next;
+		tp->next= NULL;
 	}
 	//if (rec_head->next == NULL)
 	//	rec_head = tp;
-	tp = NULL;											//准备建立新节点
+	//tp = NULL;	
+	//free(tp);
+	//tp = NULL;
+	printf("%d", x);
+	//准备建立新节点
 	//rec_this->next = tp;
 	//rec_this = tp;
 	//fclose(infile);
@@ -114,36 +157,42 @@ void printf_number(record* rec_head) {
 
 void stdprint(record* p)
 {
-	printf("%d %s %d %d\n"
-		, p->num_check
-		, p->pat.name_pat
-		, p->pat.age
-		, p->pat.tag_pat);
-	printf("%s %s %s %d\n"
-		, p->doc.name_doc
-		, p->doc.level
-		, p->doc.sub
-		, p->doc.num_work);
-	printf("%s", p->out_doc);
-	//fscanf(infile, "%s", tp->tre.che.type[0]);
-	int i = 0, j = 0;
-	while (strcmp("over", p->tre.che.type[i]) != 0)//在读至over之前，循环输出检查项目名称与费用
-	{
-		printf("%s %f", p->tre.che.type[i],p->tre.che.cost_term[i]);
-		i++;
+	printf("\n---------------------------------------------------------------------------\n");
+	while (p->next!=NULL) {
+
+		printf("挂号：%d\n患者姓名：%s  年龄： %d  身份识别码：%03d\n"
+			, p->num_check
+			, p->pat.name_pat
+			, p->pat.age
+			, p->pat.tag_pat);
+		printf("主治医师：%s  级别：%s  科室：%s  医生工号：%d\n"
+			, p->doc.name_doc
+			, p->doc.level
+			, p->doc.sub
+			, p->doc.num_work);
+		printf("医生出诊时间：%s", p->out_doc);
+		//fscanf(infile, "%s", tp->tre.che.type[0]);
+		int i = 0, j = 0;
+		printf("\n\n患者检查情况：\n 检查项目    价格\n");
+		while (strcmp("over", p->tre.che.type[i]) != 0)//在读至over之前，循环输出检查项目名称与费用
+		{
+			printf("%-8s   %6.2f元\n", p->tre.che.type[i], p->tre.che.cost_term[i]);
+			i++;
+		}
+		printf("\n患者开药情况：\n 药品名    单价    数量\n");
+		while (strcmp("over", p->tre.pil.name_pill[j]) != 0)//在读至over之前，循环输出药品单价与数量
+		{
+			printf("%-8s   %4.2f元   %-4d\n"
+				, p->tre.pil.name_pill[j]
+				, p->tre.pil.cost_perpill[j]
+				, p->tre.pil.num_pill[j]);
+			j++;
+		}
+		printf("\n住院开始时间:%04d\n预计出院时间:%04d\n押金:%d"									//输出住院信息部分
+			, p->tre.hos.time_start
+			, p->tre.hos.time_end
+			, p->tre.hos.deposit);
+		p = p->next;
+		printf("\n---------------------------------------------------------------------------\n");
 	}
-	printf("\n");
-	while (strcmp("over", p->tre.pil.name_pill[j]) != 0)//在读至over之前，循环输出药品单价与数量
-	{
-		printf("%s %f %d"
-			, p->tre.pil.name_pill[j]
-			, p->tre.pil.cost_perpill[j]
-			, p->tre.pil.num_pill[j]);
-		j++;
-	}
-	printf("\n");
-	printf("%d %d %d"									//输出住院信息部分
-		, p->tre.hos.time_start
-		, p->tre.hos.time_end
-		, p->tre.hos.deposit);
 }

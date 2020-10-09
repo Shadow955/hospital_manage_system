@@ -7,16 +7,16 @@
 
 #include<stdio.h>
 struct patient {								//患者信息结构体
-	char name_pat[5];						    //患者姓名
+	char name_pat[10];						    //患者姓名
 	int age;									//年龄	
 	int tag_pat;                                //身份识别码(编码规则待定)
 	patient* next = NULL;				        //链表实现
 };
 
 struct doctor {									//医生信息结构体
-	char name_doc[5];					        //医生姓名
-	char level[5];							    //医生级别
-	char sub[5];							    //医生科室
+	char name_doc[10];					        //医生姓名
+	char level[10];							    //医生级别
+	char sub[10];							    //医生科室
 	int num_work;								//医生工号
 	doctor* next = NULL;                        //链表实现
 };

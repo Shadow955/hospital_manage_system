@@ -4,6 +4,11 @@
 #include"base_struct.h"
 #include"fileopt.h"
 #include"allfunc.h"
+//
+//char ch[] = { "123" };
+//int c = atoi(ch);
+//int k = 100;
+//sprintf(ch, "%d", k);
 
 
 int main() {
@@ -18,13 +23,14 @@ int main() {
 	printf("请输入要执行功能对应的数字：\n1:录入诊疗记录\n2:修改诊疗记录\n3:删除诊疗记录\n4:打印信息\n5:统计营业额，生成住院患者报表\n6:统计医生的出诊情况和工作繁忙程度\n7:保存当前系统中的所有信息\n");//设计数字对应操作
 	scanf("%d", &number);
 	switch (number) {
-		case 1: void input(struct record* p); break;//录入诊疗记录
-		case 2: void alter_record(struct record* head); break;//修改诊疗记录
-		case 3: void del_record(struct record* head); break;//删除诊疗记录
+		case 1: getrecord(rec_head); break;//录入诊疗记录
+		case 2: alter_record(rec_head); break;//修改诊疗记录
+		case 3: del_record(rec_head); break;//删除诊疗记录
 		case 4: printf_number(rec_head); break;//确认打印信息
-		case 5: float espence(); break;//统计营业额
-		case 6: float statistics(struct record* head); break;//统计医生的出诊情况和工作繁忙程度
-		case 7: stdprint(rec_head); break;//保存当前系统保存的信息
+		case 5: statistics(rec_head); break;//统计营业额
+		case 6: float abc(struct record* head); break;//统计医生的出诊情况和工作繁忙程度
+		case 7: output(rec_head); break;//保存当前系统保存的信息
+		case 8: stdprint(rec_head);
 	}
 }
 
