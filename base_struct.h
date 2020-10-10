@@ -7,29 +7,30 @@
 
 #include<stdio.h>
 struct patient {								//患者信息结构体
-	char name_pat[10];						    //患者姓名
+	char name_pat[50];						    //患者姓名
 	int age;									//年龄	
-	int tag_pat;                                //身份识别码(编码规则待定)
+	char sex[5];									//性别
+	int tag_id;                                //身份证号（尾号4位即可）
 	patient* next = NULL;				        //链表实现
 };
 
 struct doctor {									//医生信息结构体
-	char name_doc[10];					        //医生姓名
-	char level[10];							    //医生级别
-	char sub[10];							    //医生科室
+	char name_doc[50];					        //医生姓名
+	char level[20];							    //医生级别
+	char sub[20];							    //医生科室
 	int num_work;								//医生工号
 	doctor* next = NULL;                        //链表实现
 };
 
 struct check {									//检查结构体
-	int tag_check;                              //检查总项目数
+	int tag_check=0;                              //检查总项目数
 	char type[50][10];                          //检查类型
 	float cost_term[50];					    //单项检查费用
 	float cost_check;							//总检查费用（函数计算）
 };
 
 struct pill {									//药品结构体
-	int tag_pill;                               //药品总项目数
+	int tag_pill=0;                               //药品总项目数
 	char name_pill[30][30];				        //药品名称
 	float cost_perpill[30];                       //单价
 	int num_pill[30];                           //数量
@@ -57,6 +58,18 @@ struct record {									//诊疗记录
 	char out_doc[9];							//出诊时间
 	struct treat tre;							//诊疗情况
 	record* next = NULL;					    //链表实现
+};
+
+struct pill_term {
+	char pill_name[30];
+	float pill_price;
+	pill_term* next = NULL;
+};
+
+struct che_term {
+	char che_name[20];
+	float che_price;
+	che_term* next = NULL;
 };
 
 #endif

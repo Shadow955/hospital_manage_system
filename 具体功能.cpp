@@ -3,7 +3,7 @@
 #include"fileopt.h"
 #include<malloc.h>
 #include<string.h>
-float info_turnover(record* rec_head)                                   //Õ≥º∆ƒø«∞”™“µ∂Ó£¨≤ª∫¨◊°‘∫—∫Ω
+float info_turn(record* rec_head)                                   //Õ≥º∆ƒø«∞”™“µ∂Ó£¨≤ª∫¨◊°‘∫—∫Ω
 {
 	float sum;
 	record* p = rec_head->next;
@@ -21,7 +21,7 @@ void alter_record(int tag_bat_1,record* rec_head)                   //∞¥’’≤∆ŒÒπÊ
 	m = tag_bat_1;
 	while (a)
 	{
-		if ((p != NULL) && ((p->pat.tag_pat) != m))
+		if ((p != NULL) && ((p->pat.tag_id) != m))
 			p = p->next;
 			if (p == NULL)
 				printf("≤ÈŒﬁ¥À»À");
@@ -65,7 +65,7 @@ void delete_record(int tag_bat_1,record* rec_head)                            //
 	while (a)
 	{
 		record* q = rec_head, * p = q->next;
-		if ((p != NULL) && ((p->pat.tag_pat) != m))
+		if ((p != NULL) && ((p->pat.tag_id) != m))
 		{
 			q = p;
 				p = p->next;
@@ -94,7 +94,7 @@ void print_time_record(int time1, int time2,record* rec_head)                   
 	while(p != NULL){
 		if ((p->tre.hos.time_start > time1) || (p->tre.hos.time_start == time1) || (p->tre.hos.time_start < time2))   //≈–∂œ ±º‰∑∂Œß≤¢¥Ú”°’Ô¡∆–≈œ¢
 			printf("%d", p->num_check);
-		printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_pat);                                          //ªº’ﬂ–≈œ¢
+		printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_id);                                          //ªº’ﬂ–≈œ¢
 		printf("%s\n%s\n%d\n", p->doc.name_doc, p->doc.sub, p->doc.num_work);                         //“Ω…˙–≈œ¢
 		int i; 
 		for (i = 0;i < (p->tre.che.tag_check);i++)                                                                     //ºÏ≤È–≈œ¢
@@ -118,7 +118,7 @@ void print_sub_record(record*rec_head)                                      //¥Ú
 	{
 		if (strcmp(p->doc.sub, m) == 0) {                    //ºÏÀ˜ø∆ “≤¢ ‰≥ˆ’Ô¡∆–≈œ¢
 			printf("%d", p->num_check);
-			printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_pat);
+			printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_id);
 			printf("%s\n%s\n%d\n", p->doc.name_doc, p->doc.sub, p->doc.num_work);
 			int i;
 			for (i = 0;i < (p->tre.che.tag_check);i++)
@@ -145,7 +145,7 @@ void print_doc_record(record* rec_head)                                         
 		if ((p->doc.num_work) == m)
 		{
 			printf("%d", p->num_check);
-			printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_pat);                                          //ªº’ﬂ–≈œ¢
+			printf("%s\n%d\n%d\n", p->pat.name_pat, p->pat.age, p->pat.tag_id);                                          //ªº’ﬂ–≈œ¢
 			printf("%s\n%s\n%d\n", p->doc.name_doc, p->doc.sub, p->doc.num_work);                         //“Ω…˙–≈œ¢
 			int i;
 			for (i = 0;i < (p->tre.che.tag_check);i++)                                                                    //ºÏ≤È–≈œ¢
@@ -171,7 +171,7 @@ void print_stat_pat(record* rec_head)                                  //¥Ú”°◊°‘
 	while(p != NULL)                    //≥ˆ‘∫»’∆⁄Œ™ø’‘Ú¥Ú”°
 	{
 		if((p->out_doc) != NULL)
-		printf("%s    %d    %d", p->pat.name_pat, p->pat.age, p->pat.tag_pat);
+		printf("%s    %d    %d", p->pat.name_pat, p->pat.age, p->pat.tag_id);
 		p = p->next;
 	}
 }

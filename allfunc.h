@@ -10,7 +10,7 @@ int days_hosp(int time_start, int time_end);                  //计算住院时长函数
 
 int cost_hos(int a, int b, int c);          //住院费用函数
 
-void getrecord(struct record* head);
+record* getrecord();
 
 void outpatient_tag(struct record* head, int tag_in);  //依据患者相关信息输出数据
 

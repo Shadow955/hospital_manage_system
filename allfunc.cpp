@@ -70,62 +70,79 @@ int cost_hos(int a,int b,int c)           //住院费用函数
 	return sum;
 }
 
-void getrecord(struct record* head)    //录入记录
+record* getrecord()    //录入记录
 {
 	record* temp = (record*)malloc(sizeof(record));
 	temp->next = NULL;
-	record* p, * q;
-	p = head; q = p->next;
-	while (q != NULL)
+	printf("请输入挂号\n");
+	scanf("%d", &(temp->num_check));
+	printf("\n以下为输入患者信息，每条信息以回车结束\n\n请输入患者姓名：\n");
+	scanf("%s", &(temp->pat.name_pat));getchar();
+	printf("性别：\n");
+	scanf("%s", temp->pat.sex);getchar();
+	printf("年龄：\n");
+	scanf("%d", &temp->pat.age);
+	printf("身份证号后四位：\n");
+	scanf("%04d", &temp->pat.tag_id);getchar();
+	printf("\n以下为输入医生信息，每条信息以回车结束\n\n请输入主治医生姓名：\n");
+	scanf("%s",&(temp->doc.name_doc));getchar();
+	printf("医生级别：\n");
+	scanf("%s", temp->doc.level);getchar();
+	printf("医生科室：\n");
+	scanf("%s", temp->doc.sub);getchar();
+	printf("医生工号：\n");
+	scanf("%d", &temp->doc.num_work);getchar();
+	printf("输入就诊时间：\n");
+	scanf("%s", temp->out_doc);getchar();
+	printf("请输入各项检查及其费用,输入“#”以结束\n");
+	(temp->tre.che.tag_check) = 0; 
+	bool flag_che = true; 
+	int i = 0;
+	while(flag_che)
 	{
-		p = q;
-		q = q->next;
+		printf("输入检查项目名称：\n");
+		scanf("%s", &(temp->tre.che.type[i]));
+		if (strcmp("#", temp->tre.che.type[i])==0)
+		{
+			flag_che = false;
+			(temp->tre.che.cost_check) = sumcheck((temp->tre.che.tag_check), (temp->tre.che.cost_term));
+			break;
+		}
+		printf("输入该项检查费用：\n");
+		scanf("%f", &(temp->tre.che.cost_term[i]));
+		(temp->tre.che.tag_check)++;
+		i++;
 	}
-	if (q == NULL)
+	printf("请输入各药品名称及其数量和单价,输入“#”以结束\n");
+	(temp->tre.pil.tag_pill) = 0; 
+	bool flag_pil = true; 
+	i = 0;
+	while (flag_pil)
 	{
-		printf("请输入患者信息\n");
-		p->next = temp; q = temp;
-		scanf("%s %d", &(q->pat.name_pat), &(q->pat.age));
-		printf("请输入挂号\n");
-		scanf("%d", &(q->num_check));
-		printf("请输入医生信息\n");
-		scanf("%s%s%s%d",&(q->doc.name_doc) , &(q->doc.level), &(q->doc.sub), &(q->doc.num_work));
-		printf("请输入出诊时间\n");
-		scanf("%s", &(q->out_doc[8]));
-		printf("请输入各项检查及其费用,若输入结束请键入‘|’\n");
-		(q->tre.che.tag_check) = 0; bool flag_che = true; int i = 0;
-		while(flag_che)
+		printf("输入药品名称：\n");
+		scanf("%s", temp->tre.pil.name_pill[i]);
+		if (strcmp("#", temp->tre.pil.name_pill[i])==0)
 		{
-			scanf("%s", &(q->tre.che.type[i]));
-			if ((q->tre.che.type[i][0]) == '|')
-			{
-				flag_che = false;
-				(q->tre.che.cost_check) = sumcheck((q->tre.che.tag_check), (q->tre.che.cost_term));
-				break;
-			}
-			scanf("%f", &(q->tre.che.cost_term[i]));
-			(q->tre.che.tag_check)++;
+			flag_pil = false;
+			(temp->tre.pil.cost_pill) = sumpill(temp->tre.pil.tag_pill, temp->tre.pil.cost_perpill, temp->tre.pil.num_pill);
+			break;
 		}
-		printf("请输入各药品名称及其数量和单价,若输入结束请键入‘|’\n");
-		(q->tre.pil.tag_pill) = 0; bool flag_pil = true; i = 0;
-		while (flag_pil)
-		{
-			scanf("%s", &(q->tre.pil.name_pill[i]));
-			if ((q->tre.pil.name_pill[i][0]) == '|')
-			{
-				flag_pil = false;
-				(q->tre.pil.cost_pill) = sumpill(q->tre.pil.tag_pill, q->tre.pil.cost_perpill, q->tre.pil.num_pill);
-				break;
-			}
-			scanf("%d%d", &(q->tre.pil.cost_perpill[i]), &(q->tre.pil.num_pill[i]));
-			(q->tre.pil.tag_pill)++;
-		}
-		printf("请输入开始住院时间，预计出院时间及已交纳的住院押金\n");
-		scanf("%d%d%d", &(q->tre.hos.time_start), &(q->tre.hos.time_end), &(q->tre.hos.deposit));
-		(q->tre.hos.days_hos) = days_hosp(q->tre.hos.time_start, q->tre.hos.time_end);
+		printf("输入药品单价：\n");
+		scanf("%f", &(temp->tre.pil.cost_perpill[i]));
+		printf("输入药品数量：\n");
+		scanf("%d", &temp->tre.pil.num_pill[i]);
+		(temp->tre.pil.tag_pill)++;
+		i++;
 	}
-    free(temp);
-	return;
+	printf("\n请输入开始住院时间：\n");
+	scanf("%04d", &(temp->tre.hos.time_start));
+	printf("\n请输入预计出院时间：\n");
+	scanf("%04d", &(temp->tre.hos.time_end));
+	printf("\n请输入缴纳住院押金：\n");
+	scanf("%d",&(temp->tre.hos.deposit));
+	(temp->tre.hos.days_hos) = days_hosp(temp->tre.hos.time_start, temp->tre.hos.time_end);
+	printf("\n诊疗记录录入成功！\n");
+	return temp;
 }
 
 void outpatient_tag(struct record* head, int tag_in)   //依据患者识别码输出数据
@@ -134,7 +151,7 @@ void outpatient_tag(struct record* head, int tag_in)   //依据患者识别码输出数据
 	scanf("%d", &tag_in);
 	record* p, * q;
 	p = head; q = head->next;
-	for (((p->pat).tag_pat) = tag_in; q != NULL;)
+	for (((p->pat).tag_id) = tag_in; q != NULL;)
 	{
 		printf("%s %d ", ((p->pat).name_pat), ((p->pat).age));//输出患者信息部分
 		printf("%s %s %s %d", ((p->doc).name_doc), ((p->doc).level), ((p->doc).sub), ((p->doc).num_work));//输出医生信息部分
@@ -431,13 +448,13 @@ void alter_record(struct record* head)   //修改操作
 
 float statistics(struct record* head)    //营业额
 {
-	float turnover = 0;
+	float turn = 0;
 	record* p, * q;
 	p = head; q = p->next;
 	for (p != NULL;;)
 	{
-		turnover = turnover + (p->tre.che.cost_check) + (p->tre.pil.cost_pill) + (float)(p->tre.hos.cost_hos);
+		turn = turn+ (p->tre.che.cost_check) + (p->tre.pil.cost_pill) + (float)(p->tre.hos.cost_hos);
 		p = q; q = q->next;
 	}
-	return turnover;
+	return turn;
 }
