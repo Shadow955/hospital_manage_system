@@ -10,7 +10,7 @@ struct patient {								//患者信息结构体
 	char name_pat[50];						    //患者姓名
 	int age;									//年龄	
 	char sex[5];									//性别
-	int tag_id;                                //身份证号（尾号4位即可）
+	char tag_id[5];                                //身份证号（尾号4位即可）
 	patient* next = NULL;				        //链表实现
 };
 
@@ -55,7 +55,7 @@ struct record {									//诊疗记录
 	int num_check;                              //挂号
 	struct patient pat;							//患者信息
 	struct doctor doc;							//医生信息
-	char out_doc[9];							//出诊时间
+	char out_doc[13];							//出诊时间
 	struct treat tre;							//诊疗情况
 	record* next = NULL;					    //链表实现
 };

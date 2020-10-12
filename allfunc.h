@@ -12,7 +12,7 @@ int cost_hos(int a, int b, int c);          //住院费用函数
 
 record* getrecord();
 
-void outpatient_tag(struct record* head, int tag_in);  //依据患者相关信息输出数据
+void outpatient_tag(struct record* head);  //依据患者相关信息输出数据
 
 void outpatient_name(struct record* head);		//检索患者姓名并输出
 
@@ -31,3 +31,5 @@ void input(struct record* p);  //录入诊疗记录
 void alter_record(struct record* head);  //修改操作
 
 float statistics(struct record* head);   //营业额
+
+bool judge(int i, record*, che_term*, pill_term*, doctor*);

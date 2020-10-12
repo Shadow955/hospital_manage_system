@@ -2,6 +2,8 @@
 
 int openfile();
 
+char* gettime();
+
 record*  read_and_link();
 
 void printf_number(record* , pill_term* , che_term* , doctor* );
@@ -21,3 +23,7 @@ void docprint(doctor*);
 void pillprint(pill_term*);
 
 void cheprint(che_term*);
+
+void singleprint(record*);
+
+void save(record*);

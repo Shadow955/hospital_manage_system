@@ -5,12 +5,16 @@
 #include<string.h>
 #include"fileopt.h"
 #include"allfunc.h"
+#include<time.h>
 FILE* file_rec;
 FILE* file_pill;
 FILE* file_doc;
 FILE* file_che;
+//FILE* outfile;
+extern time_t t;
+extern char* Time;
 int openfile() {															//文件读入函数，成功返回1，失败返回0
-	file_rec = fopen("test.txt", "r");							//读取文件并判断是否成功打开
+	file_rec = fopen("test.txt", "r+");							//读取文件并判断是否成功打开
 	file_pill = fopen("pill.txt", "r");
 	file_doc = fopen("doc.txt", "r");
 	file_che = fopen("check.txt", "r");
@@ -76,6 +80,17 @@ int openfile() {															//文件读入函数，成功返回1，失败返回0
 //	fclose(fileReadPointer);
 //	return res;
 //}
+
+char* gettime()
+{
+	//更新当前的time_t 变量为当前系统时钟
+	time(&t);
+	//ctime（）返回字符串类型的 time_t 变量格式
+	char* Time = ctime(&t);
+	Time += 4;
+	Time[11] = '\0';
+	return Time;
+}
 record* read_and_link() 
 {
 	record* rec_head = (record*)malloc(sizeof(record));		//建立头节点
@@ -86,7 +101,7 @@ record* read_and_link()
 	while (!feof(file_rec))																//循环读入直至文件末尾
 	{
 		fscanf(file_rec, "%d", &tp->num_check);
-		fscanf(file_rec, "%s%s%d%d"
+		fscanf(file_rec, "%s%s%d%s"
 			, tp->pat.name_pat
 			, tp->pat.sex
 			, &tp->pat.age
@@ -96,7 +111,8 @@ record* read_and_link()
 			, tp->doc.level
 			, tp->doc.sub
 			, &tp->doc.num_work);
-		fscanf(file_rec, "%s", tp->out_doc);
+		fgetc(file_rec);
+		fgets( tp->out_doc,13,file_rec);
 		int i = 0, j = 0;
 		while(1)
 		{
@@ -207,7 +223,7 @@ void printf_number(record* rec_head,pill_term* pill_head,che_term* che_head,doct
 	case 2: 
 		outname_doc(rec_head); break;//打印某医生诊疗信息
 	case 3: 
-		outpatient_name(rec_head); break;//打印某患者历史诊疗记录
+		outpatient_tag(rec_head); break;//打印某患者历史诊疗记录
 	case 4: 
 		outtime_limit(rec_head); break;//打印某段时间内的诊疗记录
 	case 5:
@@ -228,46 +244,51 @@ record* FindEnd(record* head)
 	}
 	return p;
 }
+
+void singleprint(record* p) 
+{
+	printf("挂号：%07d\n患者姓名：%s\n性别：%s  年龄：%d  身份证尾号：%s\n"
+		, p->num_check
+		, p->pat.name_pat
+		, p->pat.sex
+		, p->pat.age
+		, p->pat.tag_id);
+	printf("\n主治医师：%s\n级别：%s  科室：%s  医生工号：%07d\n"
+		, p->doc.name_doc
+		, p->doc.level
+		, p->doc.sub
+		, p->doc.num_work);
+	printf("医生出诊时间：%s", p->out_doc);
+	int i = 0, j = 0;
+	printf("\n\n患者检查情况：\n 检查项目           价格\n");
+	while (strcmp("#", p->tre.che.type[i]) != 0)//在读至#之前，循环输出检查项目名称与费用
+	{
+		printf("%-16s   %6.2f元\n", p->tre.che.type[i], p->tre.che.cost_term[i]);
+		i++;
+	}
+	printf("\n患者开药情况：\n 药品名              单价      数量\n");
+	while (strcmp("#", p->tre.pil.name_pill[j]) != 0)//在读至#之前，循环输出药品单价与数量
+	{
+		printf("%-16s   %6.2f元   %3d\n"
+			, p->tre.pil.name_pill[j]
+			, p->tre.pil.cost_perpill[j]
+			, p->tre.pil.num_pill[j]);
+		j++;
+	}
+	printf("\n住院开始时间:%04d\n预计出院时间:%04d\n押金:%d"									//输出住院信息部分
+		, p->tre.hos.time_start
+		, p->tre.hos.time_end
+		, p->tre.hos.deposit);
+	//p = p->next;
+	printf("\n---------------------------------------------------------------------------\n");
+}
 void stdprint(record* p)
 {
 	printf("\n---------------------------------------------------------------------------\n");
 	while (p!=NULL)
 	{
-		printf("挂号：%07d\n患者姓名：%s  性别：%s  年龄： %d  身份证尾号：%04d\n"
-			, p->num_check
-			, p->pat.name_pat
-			, p->pat.sex
-			, p->pat.age
-			, p->pat.tag_id);
- 		printf("主治医师：%s  级别：%s  科室：%s  医生工号：%07d\n"
-			, p->doc.name_doc
-			, p->doc.level
-			, p->doc.sub
-			, p->doc.num_work);
-		printf("医生出诊时间：%s", p->out_doc);
-		//fscanf(file_rec, "%s", tp->tre.che.type[0]);
-		int i = 0, j = 0;
-		printf("\n\n患者检查情况：\n 检查项目    价格\n");
-		while (strcmp("#", p->tre.che.type[i]) != 0)//在读至#之前，循环输出检查项目名称与费用
-		{
- 			printf("%-8s   %6.2f元\n", p->tre.che.type[i], p->tre.che.cost_term[i]);
-			i++;
-		}
-		printf("\n患者开药情况：\n 药品名     单价      数量\n");
-		while (strcmp("#", p->tre.pil.name_pill[j]) != 0)//在读至#之前，循环输出药品单价与数量
-		{
-			printf("%-8s   %5.2f元   %3d\n"
-				, p->tre.pil.name_pill[j]
-				, p->tre.pil.cost_perpill[j]
-				, p->tre.pil.num_pill[j]);
-			j++;
-		}
-		printf("\n住院开始时间:%04d\n预计出院时间:%04d\n押金:%d"									//输出住院信息部分
-			, p->tre.hos.time_start
-			, p->tre.hos.time_end
-			, p->tre.hos.deposit);
+		singleprint(p);
 		p = p->next;
-		printf("\n---------------------------------------------------------------------------\n");
 	}
 }
 
@@ -302,4 +323,53 @@ void cheprint(che_term* p)
 		p = p->next;
 	}
 	printf("---------------------------------------------------------------------------\n\n");
+}
+
+void save(record* head)
+{
+	rewind(file_rec);
+	record* tp = head;
+	while (tp != NULL)
+	{
+		fprintf(file_rec, "%d ", tp->num_check);
+		fprintf(file_rec, "%s %s %d %s "
+			, tp->pat.name_pat
+			, tp->pat.sex
+			, tp->pat.age
+			, tp->pat.tag_id);
+		fprintf(file_rec, "%s %s %s %d "
+			, tp->doc.name_doc
+			, tp->doc.level
+			, tp->doc.sub
+			, tp->doc.num_work);
+		fprintf(file_rec, "%s ", tp->out_doc);
+		int i = 0, j = 0;
+		while (1)
+		{
+			fprintf(file_rec, "%s ", tp->tre.che.type[i]);
+			if (strcmp("#", tp->tre.che.type[i]) == 0)
+				break;
+			fprintf(file_rec, "%.2f ", tp->tre.che.cost_term[i]);
+			i++;
+		}
+		while (1)//在读至#之前，循环读入药品单价与数量
+		{
+			fprintf(file_rec, "%s ", tp->tre.pil.name_pill[j]);
+			if (strcmp("#", tp->tre.pil.name_pill[j]) == 0)
+				break;
+			fprintf(file_rec, "%.2f %d "
+				, tp->tre.pil.cost_perpill[j]
+				, tp->tre.pil.num_pill[j]);
+			j++;
+		}
+		fprintf(file_rec, "%d %d %d"									//读入住院信息部分
+			, tp->tre.hos.time_start
+			, tp->tre.hos.time_end
+			, tp->tre.hos.deposit);
+		if (tp->next != NULL)
+			fprintf(file_rec, "\n");
+		tp = tp->next;
+	}
+	//fclose(file_rec);
+	printf("\n保存成功！\n");
 }

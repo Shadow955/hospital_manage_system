@@ -139,6 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="check.txt" />
+    <Text Include="doc.txt" />
+    <Text Include="pill.txt" />
     <Text Include="test.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -150,7 +153,6 @@
     <ClCompile Include="allfunc.cpp" />
     <ClCompile Include="fileopt.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="具体功能.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

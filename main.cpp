@@ -1,6 +1,8 @@
 #define funds = 0;
 #include<stdio.h>
 #include<stdlib.h>
+#include<string>
+#include<string.h>
 #include"base_struct.h"
 #include"fileopt.h"
 #include"allfunc.h"
@@ -10,10 +12,19 @@
 //int k = 100;
 //sprintf(ch, "%d", k);
 
+time_t t;
+
+
 
 int main() {
+
+	printf("当前时间：");
+	char*T=gettime();
+	printf("%s\n", T);
+
 	if (!openfile())									//开始时先执行文件读入函数
-		return 0;					
+		return 0;				
+
 	record* rec_head = read_and_link();  //读入源文件中现有的所有诊疗记录并生成一条链表
 	record* p;
 	pill_term* pill_head = link_pill();
@@ -44,7 +55,7 @@ int main() {
 			case 6: 
 				float abc(struct record* head); break;  //统计医生的出诊情况和工作繁忙程度
 			case 7: 
-				output(rec_head); break;  //保存当前系统保存的信息
+				save(rec_head); break;  //保存当前系统保存的信息
 			case 8: 
 				stdprint(rec_head);
 		}
@@ -53,7 +64,11 @@ int main() {
 		printf("4 : 打印信息\n5 : 统计营业额，生成住院患者报表\n");
 		printf("6 : 统计医生的出诊情况和工作繁忙程度\n7 : 保存当前系统中的所有信息\n");
 		printf("8 : 查看当前保存的所有诊疗记录\n0 : 退出\n");//设计数字对应操作
+		printf("当前时间：");
+		char* T = gettime();
+		printf("%s\n", T);                     
 	}
+	//fclose(file_rec);
 	//free(p);
 }
 
