@@ -43,7 +43,7 @@ int main() {
 		switch (number) 
 		{
 			case 1: 
-				p->next=getrecord(); break;  //录入诊疗记录
+				p->next=getrecord(doc_head, pill_head, che_head); break;  //录入诊疗记录
 			case 2: 
 				alter_record(rec_head); break;  //修改诊疗记录
 			case 3: 

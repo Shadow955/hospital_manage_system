@@ -362,7 +362,7 @@ void save(record* head)
 				, tp->tre.pil.num_pill[j]);
 			j++;
 		}
-		fprintf(file_rec, "%d %d %d"									//读入住院信息部分
+		fprintf(file_rec, "%04d %04d %d"									//读入住院信息部分
 			, tp->tre.hos.time_start
 			, tp->tre.hos.time_end
 			, tp->tre.hos.deposit);

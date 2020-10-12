@@ -10,7 +10,7 @@ int days_hosp(int time_start, int time_end);                  //计算住院时长函数
 
 int cost_hos(int a, int b, int c);          //住院费用函数
 
-record* getrecord();
+record* getrecord(doctor*,pill_term*,che_term*);
 
 void outpatient_tag(struct record* head);  //依据患者相关信息输出数据
 
@@ -32,4 +32,26 @@ void alter_record(struct record* head);  //修改操作
 
 float statistics(struct record* head);   //营业额
 
-bool judge(int i, record*, che_term*, pill_term*, doctor*);
+void yearchange(int);
+
+bool judge_year(int a);
+
+bool judge_name_pat(record* p);
+
+bool judge_age(record* p);
+
+bool judge_sex(record* p);
+
+bool judge_tag_id(record* p);
+
+bool judge_num_check(record* p);
+
+che_term* judge_che_name(char* p, che_term* q);
+
+pill_term* judge_pill_name(char* p, pill_term* q);
+
+doctor* judge_num_work(int num, doctor* s);
+
+bool time(int a, int b);
+
+bool judge_time(record* p);

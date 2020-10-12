@@ -72,7 +72,7 @@ int cost_hos(int a,int b,int c)           //住院费用函数
 	return sum;
 }
 
-record* getrecord()    //录入记录
+record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //录入记录
 {
 	record* temp = (record*)malloc(sizeof(record));
 	temp->next = NULL;
@@ -86,14 +86,24 @@ record* getrecord()    //录入记录
 	scanf("%d", &temp->pat.age);
 	printf("身份证号后四位：\n");
 	scanf("%s", temp->pat.tag_id);getchar();
-	printf("\n以下为输入医生信息，每条信息以回车结束\n\n请输入主治医生姓名：\n");
-	scanf("%s",&(temp->doc.name_doc));getchar();
-	printf("医生级别：\n");
-	scanf("%s", temp->doc.level);getchar();
-	printf("医生科室：\n");
-	scanf("%s", temp->doc.sub);getchar();
+	//printf("\n以下为输入医生信息，每条信息以回车结束\n\n请输入主治医生姓名：\n");
+	//scanf("%s",&(temp->doc.name_doc));getchar();
+	//printf("医生级别：\n");
+	//scanf("%s", temp->doc.level);getchar();
+	//printf("医生科室：\n");
+	//scanf("%s", temp->doc.sub);getchar();
 	printf("医生工号：\n");
 	scanf("%d", &temp->doc.num_work);getchar();
+	doctor* tpdoc = judge_num_work(temp->doc.num_work, doc);
+	while (tpdoc == NULL)
+	{
+		printf("工号不存在！请检查后重新输入\n");
+		scanf("%d", &temp->doc.num_work); getchar();
+		tpdoc = judge_num_work(temp->doc.num_work, doc);
+	}
+	strcpy(temp->doc.name_doc, tpdoc->name_doc);
+	strcpy(temp->doc.level, tpdoc->level);
+	strcpy(temp->doc.sub, tpdoc->sub);
 	/*printf("输入就诊时间：\n");
 	scanf("%s", temp->out_doc);getchar();*/
 	strcpy(temp->out_doc , gettime());
@@ -111,8 +121,24 @@ record* getrecord()    //录入记录
 			(temp->tre.che.cost_check) = sumcheck((temp->tre.che.tag_check), (temp->tre.che.cost_term));
 			break;
 		}
-		printf("输入该项检查费用：\n");
-		scanf("%f", &(temp->tre.che.cost_term[i]));
+		else {
+			che_term* tpche = judge_che_name(temp->tre.che.type[i],che);
+			while (tpche==NULL) 
+			{
+				printf("该检查项目不存在！请检查后重新输入");
+				scanf("%s", &(temp->tre.che.type[i]));
+				if (strcmp("#", temp->tre.che.type[i]) == 0)
+				{
+					flag_che = false;
+					(temp->tre.che.cost_check) = sumcheck((temp->tre.che.tag_check), (temp->tre.che.cost_term));
+					break;
+				}
+				tpche = judge_che_name(temp->tre.che.type[i], che);
+			}
+			temp->tre.che.cost_term[i] = tpche->che_price;
+		}
+		//printf("输入该项检查费用：\n");
+		//scanf("%f", &(temp->tre.che.cost_term[i]));
 		(temp->tre.che.tag_check)++;
 		i++;
 	}
@@ -130,8 +156,25 @@ record* getrecord()    //录入记录
 			(temp->tre.pil.cost_pill) = sumpill(temp->tre.pil.tag_pill, temp->tre.pil.cost_perpill, temp->tre.pil.num_pill);
 			break;
 		}
-		printf("输入药品单价：\n");
-		scanf("%f", &(temp->tre.pil.cost_perpill[i]));
+		else
+		{
+			pill_term* tppill = judge_pill_name(temp->tre.pil.name_pill[i], pill);
+			while (tppill==NULL)
+			{
+				printf("该药品名不存在！请检查后重新输入");
+				scanf("%s", temp->tre.pil.name_pill[i]);
+				if (strcmp("#", temp->tre.pil.name_pill[i]) == 0)
+				{
+					flag_pil = false;
+					(temp->tre.pil.cost_pill) = sumpill(temp->tre.pil.tag_pill, temp->tre.pil.cost_perpill, temp->tre.pil.num_pill);
+					break;
+				}
+				tppill = judge_pill_name(temp->tre.pil.name_pill[i], pill);
+			}
+			temp->tre.pil.cost_perpill[i] = tppill->pill_price;
+		}
+		//printf("输入药品单价：\n");
+		//scanf("%f", &(temp->tre.pil.cost_perpill[i]));
 		printf("输入药品数量：\n");
 		scanf("%d", &temp->tre.pil.num_pill[i]);
 		(temp->tre.pil.tag_pill)++;
@@ -560,43 +603,32 @@ bool judge_num_check(record* p) {                  //判断挂号
 	return true;
 }
 
-bool judge_che_name(record* p, che_term* q) {       //判断检查名称
-	int t = 0;
-	for (t = 0; t < 19; t++) {
-		if (strcmp(q->che_name, p->tre.che.type[p->tre.che.tag_check]) == 0) {
-			return true;
-		}
-		else {
-			q = q->next;
-		}
+che_term* judge_che_name(char* p, che_term* q) {				 //判断检查名称是否正确
+	bool flag = false;
+	while (q != NULL) {
+		if (strcmp(p, q->che_name) == 0)
+			return q;
+		q = q->next;
 	}
-	return false;
+	return NULL;
 }
 
-bool judge_pill_name(record* p, pill_term* r) {               //判断药品
-	int t = 0;
-	for (t = 0; t < 30; t++) {
-		if (strcmp(r->pill_name, p->tre.pil.name_pill[p->tre.pil.tag_pill]) == 0) {
-			return true;
-		}
-		else {
-			r = r->next;
-		}
+pill_term* judge_pill_name(char* p, pill_term* q) {               //判断药品名称是否正确
+	while (q != NULL) {
+		if (strcmp(p, q->pill_name) == 0)
+			return q;
+		q = q->next;
 	}
-	return false;
+	return NULL;
 }
 
-bool judge_num_work(record* p, doctor* s) {               //判断医生工号
-	int t = 0;
-	for (t = 0; t < 30; t++) {
-		if (s->num_work == p->doc.num_work) {
-			return true;
-		}
-		else {
-			s = s->next;
-		}
+doctor* judge_num_work(int num, doctor* s) {					//判断医生工号
+	while (s != NULL) {
+		if (num == s->num_work)
+			return s;
+		s = s->next;
 	}
-	return false;
+	return NULL;
 }
 
 bool time(int a, int b) {                             //判断时间
