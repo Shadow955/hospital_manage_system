@@ -10,11 +10,10 @@ FILE* file_rec;
 FILE* file_pill;
 FILE* file_doc;
 FILE* file_che;
-//FILE* outfile;
 extern time_t t;
 extern char* Time;
 int openfile() {															//文件读入函数，成功返回1，失败返回0
-	file_rec = fopen("test.txt", "r+");							//读取文件并判断是否成功打开
+	file_rec = fopen("test.txt", "r");							//读取文件并判断是否成功打开
 	file_pill = fopen("pill.txt", "r");
 	file_doc = fopen("doc.txt", "r");
 	file_che = fopen("check.txt", "r");
@@ -61,7 +60,7 @@ int turnyear(char a[5])
 	return m;
 }
 
-record* read_and_link() 
+record* read_and_link(doctor* docHead) 
 {
 	record* rec_head = (record*)malloc(sizeof(record));		//建立头节点
 	rec_head->next = NULL;
@@ -110,7 +109,10 @@ record* read_and_link()
 			, &tp->tre.hos.time_start
 			, &tp->tre.hos.time_end
 			, &tp->tre.hos.deposit);
-		tp->tre.hos.cost_hos = cost_hos(tp->tre.hos.time_start, tp->tre.hos.time_end, turndate(gettime()));
+		int now = turndate(gettime());
+		tp->tre.hos.cost_hos = cost_hos(date_turn(tp->tre.hos.time_start), date_turn(tp->tre.hos.time_end), date_turn(now));
+		if (now <= tp->tre.hos.time_end)
+			DoctorState(tp->doc.num_work, docHead);
 		tp->next = (record*)malloc(sizeof(record));
 		tp->next->next = NULL;
 		pre = tp;
@@ -119,6 +121,7 @@ record* read_and_link()
 	free(tp);
 	pre->next = NULL;
 	printf("诊疗记录链表构建成功！\n");
+	fclose(file_rec);
 	return (rec_head);
 }
 
@@ -161,6 +164,7 @@ che_term* link_che()
 	free(tp);
 	pre->next = NULL;
 	printf("检查项目链表构建成功！\n");
+	fclose(file_che);
 	return (che_head);
 }
 
@@ -174,6 +178,7 @@ doctor* link_doc()
 	while (!feof(file_doc))
 	{
 		fscanf(file_doc, "%s%s%s%d", tp->name_doc, tp->level, tp->sub, &tp->num_work);
+		tp->state = 0;
 		tp->next = (doctor*)malloc(sizeof(doctor));
 		tp->next->next = NULL;
 		pre = tp;
@@ -182,30 +187,76 @@ doctor* link_doc()
 	free(tp);
 	pre->next = NULL;
 	printf("医生链表构建成功！\n");
+	fclose(file_doc);
 	return (doc_head);
 }
 
-void printf_number(record* rec_head,pill_term* pill_head,che_term* che_head,doctor* doc_head) {
+void freerec(record* head)
+{
+	record* p = head;
+	record* pre = p;
+	while (p->next != NULL)
+	{
+		p = p->next;
+		free(pre);
+		pre = p;
+	}
+	free(p);
+}
+void freedoc(doctor* head)
+{
+	doctor* p = head;
+	doctor* pre = p;
+	while (p->next != NULL)
+	{
+		p = p->next;
+		free(pre);
+		pre = p;
+	}
+	free(p);
+}
+void freepill(pill_term* head)
+{
+	pill_term* p = head;
+	pill_term* pre = p;
+	while (p->next != NULL)
+	{
+		p = p->next;
+		free(pre);
+		pre = p;
+	}
+	free(p);
+}
+void freeche(che_term* head)
+{
+	che_term* p = head;
+	che_term* pre = p;
+	while (p->next != NULL)
+	{
+		p = p->next;
+		free(pre);
+		pre = p;
+	}
+	free(p);
+}
+
+void printf_number(record* rec_head) {
 	int number1;//保存输入的数字
-	printf("请输入功能对应的数字：\n1 : 打印某科室诊疗信息\n2 : 打印某医生诊疗信息\n");
-	printf("3 : 打印某患者历史诊疗记录\n4 : 打印某段时间内的诊疗记录\n");
-	printf("5 : 浏览全部医生数据\n6 : 浏览药品库数据\n7 : 浏览各项检查费用\n");
+	printf("请输入功能对应的数字：\n1 : 按姓名查找患者诊疗记录\n2 : 按身份证号查找患者诊疗记录\n");
+	printf("3 : 按工号查找某医生诊疗记录\n4 : 查找某段时间内的诊疗记录\n");
+	printf("0或其他任意键返回上层\n");
 	scanf("%d", &number1);
 	switch (number1) {
 	case 1: 
-		outsub_doc(rec_head); break;//打印某科室诊疗信息
+		outpatient_name(rec_head); break;
 	case 2: 
-		outname_doc(rec_head); break;//打印某医生诊疗信息
+		outpatient_tag(rec_head); break;
 	case 3: 
-		outpatient_tag(rec_head); break;//打印某患者历史诊疗记录
+		outname_doc(rec_head); break;
 	case 4: 
-		//outtime_limit(rec_head); break;//打印某段时间内的诊疗记录
-	case 5:
-		docprint(doc_head); break;
-	case 6:
-		pillprint(pill_head); break;
-	case 7:
-		cheprint(che_head); break;
+		outtime_limit(rec_head); break;//打印某段时间内的诊疗记录
+	default:
+		return;
 	}
 }
 
@@ -217,6 +268,38 @@ record* FindEnd(record* head)
 		p = p->next;
 	}
 	return p;
+}
+
+void search(record*head,doctor*doc,pill_term*pill,che_term*che)
+{
+	int tag;
+	record* p = head;
+	printf("请输入查找的挂号，按0取消输入并返回上层：\n");
+	scanf("%d", &tag);
+	if (tag == 0)
+		return;
+	while (p != NULL && tag != p->num_check) {
+		p = p->next;
+	}
+	while (p == NULL) {
+		printf("没有搜索到此挂号，请重新输入，按0取消输入并返回上层；\n");
+		scanf("%d", &tag);
+		if (tag == 0)
+			return;
+		while (p != NULL && tag != p->num_check) {
+			p = p->next;
+		}
+		}
+	printf("搜索成功！请输入数字使用对应操作，按0取消操作并返回上层\n");
+	printf("1:修改该诊疗记录\n2:删除该诊疗记录\n");
+	int num;
+	scanf("%d", &num);
+	switch (num)
+	{
+	case 1:alter_record(head, p, doc, pill, che); break;
+	case 2:del_record(head, p); break;
+	default:return;
+	}
 }
 
 void singleprint(record* p) 
@@ -271,7 +354,8 @@ void docprint(doctor* p)
 	printf("\n---------------------------------------------------------------------------\n");
 	while (p->next!= NULL)
 	{
-		printf("%-25s%-12s%-10s%-10d\n", p->name_doc, p->level, p->sub, p->num_work);
+		printf("%-25s%-12s%-10s%-10d", p->name_doc, p->level, p->sub, p->num_work);
+		printf("现在接诊人数：%d人\n", p->state);
 		p = p->next;
 	}
 	printf("---------------------------------------------------------------------------\n\n");
@@ -301,7 +385,8 @@ void cheprint(che_term* p)
 
 void save(record* head)
 {
-	rewind(file_rec);
+	file_rec = fopen("test.txt", "w");
+	//rewind(file_rec);
 	record* tp = head;
 	while (tp != NULL)
 	{
@@ -326,7 +411,7 @@ void save(record* head)
 			fprintf(file_rec, "%.2f ", tp->tre.che.cost_term[i]);
 			i++;
 		}
-		while (1)//在读至#之前，循环读入药品单价与数量
+		while (1)//在读至#之前，循环输出药品单价与数量
 		{
 			fprintf(file_rec, "%s ", tp->tre.pil.name_pill[j]);
 			if (strcmp("#", tp->tre.pil.name_pill[j]) == 0)
@@ -336,96 +421,22 @@ void save(record* head)
 				, tp->tre.pil.num_pill[j]);
 			j++;
 		}
-		fprintf(file_rec, "%04d %04d %d"									//读入住院信息部分
+		fprintf(file_rec, "%04d %04d %d"									//输出住院信息部分
 			, tp->tre.hos.time_start
 			, tp->tre.hos.time_end
 			, tp->tre.hos.deposit);
 		if (tp->next != NULL)
 			fprintf(file_rec, "\n");
+		if (tp->next == NULL) {
+			printf("\n保存成功！\n");
+			return;
+		}
 		tp = tp->next;
 	}
-	//fclose(file_rec);
-	printf("\n保存成功！\n");
+	fclose(file_rec);
+	//printf("\n保存成功！\n");
 }
 
-//int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
-//{
-//	char* s = data;
-//	int month_num = 0, m = 0, n = 0, p = 0;
-//	char b[4], c[3], d[3];
-//	strcpy(b, s);
-//	b[3] = '\0';
-//	s += 4;
-//	strcpy(c, s);
-//	c[2] = '\0';
-//	s += 3;
-//	strcpy(d, s);
-//	d[2] = '\0';
-//	n = (int)(c[0] - 48);
-//	p = (int)(c[1] - 48);
-//	m = ((int)d[0] - 48) * 10 + (int)d[1] - 48;
-//	if (strcmp(b, "Jan") == 0) {
-//		if (m >= 8)
-//			month_num += 100 + n * 10 + p;
-//		else month_num += 100 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Feb") == 0) {
-//		if (m >= 8)
-//			month_num += 200 + n * 10 + p;
-//		else month_num += 200 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Mar") == 0) {
-//		if (m >= 8)
-//			month_num += 300 + n * 10 + p;
-//		else month_num += 300 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Apr") == 0) {
-//		if (m >= 8)
-//			month_num += 400 + n * 10 + p;
-//		else month_num += 400 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "May") == 0) {
-//		if (m >= 8)
-//			month_num += 500 + n * 10 + p;
-//		else month_num += 500 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Jun") == 0) {
-//		if (m >= 8)
-//			month_num = 600 + n * 10 + p;
-//		else month_num = 600 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Jul") == 0) {
-//		if (m >= 8)
-//			month_num = 700 + n * 10 + p;
-//		else month_num = 700 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Aug") == 0) {
-//		if (m >= 8)
-//			month_num = 800 + n * 10 + p;
-//		else month_num = 800 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Sep") == 0) {
-//		if (m >= 8)
-//			month_num = 900 + n * 10 + p;
-//		else month_num = 900 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Oct") == 0) {
-//		if (m >= 8)
-//			month_num += 1000 + n * 10 + p;
-//		else month_num += 1000 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Nov") == 0) {
-//		if (m >= 8)
-//			month_num = 1100 + n * 10 + p;
-//		else month_num = 1100 + n * 10 + p - 1;
-//	}
-//	if (strcmp(b, "Dec") == 0) {
-//		if (m >= 8)
-//			month_num = 1200 + n * 10 + p;
-//		else month_num = 1200 + n * 10 + p - 1;
-//	}
-//	return month_num;
-//}
 
 int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
 {

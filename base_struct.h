@@ -19,6 +19,7 @@ struct doctor {									//医生信息结构体
 	char level[20];							    //医生级别
 	char sub[20];							    //医生科室
 	int num_work;								//医生工号
+	int state = 0;								//医生繁忙程度
 	doctor* next = NULL;                        //链表实现
 };
 

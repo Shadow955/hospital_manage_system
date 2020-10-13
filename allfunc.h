@@ -4,54 +4,49 @@ float sumcheck(int tag_check, float cost_term[]);
 //
 float sumpill(int tag_pill, float cost_perpill[], int num_pill[]);        //计算药品总费用函数
 //
-int date_turn(int,int);                 //将8位日期转化为天数
-
-//int days_hosp(int time_start, int time_end);                  //计算住院时长函数
-
-int cost_hos(int in, int out, int now);          //住院费用函数
-
-record* getrecord(doctor*,pill_term*,che_term*);
+int date_turn(int);                 //将8位日期转化为天数
 //
-void outpatient_tag(struct record* head);  //依据患者相关信息输出数据
-
-void outpatient_name(struct record* head);		//检索患者姓名并输出
-
-void outsub_doc(struct record* head);  //科室检索
-
-void outname_doc(struct record* head);  //医生工号检索
+int cost_hos(int , int , int);          //住院费用函数
 //
-//void outtime_limit(struct record* head);     //时间段检索
-
-//void output(struct record* head); //输出诊疗记录
-
+record* getrecord(doctor*,pill_term*,che_term*,int );
+//
+void outpatient_tag(record*);  //依据患者相关信息输出数据
+//
+void outpatient_name(record*);		//检索患者姓名并输出
+//
+void outsub_doc(record*);  //科室检索
+//
+void outname_doc(record*);  //医生工号检索
+//
+void outtime_limit(record*);     //时间段检索
+//
 void del_record(record*,record*); //删除操作
-
-//void input(struct record* p);  //录入诊疗记录
-
+//
 void alter_record(record*,record*,doctor*,pill_term*,che_term*);  //修改操作
-
-void statistics(struct record* head);   //营业额
-
+//
+void statistics(record*);   //营业额
+//
 void yearchange(int);
-
-bool judge_year(int a);
-
+//
+bool judge_year(int);
+//
 bool judge_name_pat(char*);
-
+//
 bool judge_age(int);
-
+//
 bool judge_sex(char*);
-
+//
 bool judge_tag_id(char*,char*);
-
-bool judge_num_check(record* p);
-
-che_term* judge_che_name(char* p, che_term* q);
 //
-pill_term* judge_pill_name(char* p, pill_term* q);
+bool judge_num_check(record*);
 //
-doctor* judge_num_work(int num, doctor* s);
+che_term* judge_che_name(char*, che_term*);
 //
-bool time(int a, int b);
-
+pill_term* judge_pill_name(char*, pill_term*);
+//
+doctor* judge_num_work(int, doctor*);
+//
+bool JudgeDate(int);
+//
+void DoctorState(int, doctor*);
 //bool judge_time(record* p);

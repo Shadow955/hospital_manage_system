@@ -28,7 +28,7 @@ float sumpill(int tag_pill, float cost_perpill[], int num_pill[])        //¼ÆËãÒ
 	return sum;
 }
 
-int date_turn(int time,int year)                 //½«4Î»ÈÕÆÚ×ª»¯ÎªÌìÊı
+int date_turn(int time)                 //½«4Î»ÈÕÆÚ×ª»¯ÎªÌìÊı
 {
 	int mon, day, tag = 0;
 	mon = time / 100;
@@ -48,23 +48,10 @@ int date_turn(int time,int year)                 //½«4Î»ÈÕÆÚ×ª»¯ÎªÌìÊı
 	case 11:tag = day + 304; break;
 	case 12:tag = day + 334; break;
 	}
-	if ((judge_year(year)) && mon > 2)
+	if ((judge_year(turnyear(getyear()))) && mon > 2)
 		tag++;
 	return tag;
 }
-
-//int days_hosp(int time_start, int time_end)                  //¼ÆËã×¡ÔºÊ±³¤º¯Êı
-//{
-//	char ch1[8], ch2[8];
-//	char x, y;
-//	int durtime;
-//	sprintf(ch1, "%d", time_start);
-//	sprintf(ch2, "%d", time_end);
-//	x = date_turn(ch1);
-//	y = date_turn(ch2);
-//	durtime = (((int)x) - ((int)y));
-//	return durtime;
-//}
 
 int cost_hos(int in,int out,int now)           //×¡Ôº·ÑÓÃº¯Êı
 {
@@ -74,12 +61,11 @@ int cost_hos(int in,int out,int now)           //×¡Ôº·ÑÓÃº¯Êı
 		return (out - in) * 100;
 }
 
-record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //Â¼Èë¼ÇÂ¼
+record* getrecord(doctor* doc,pill_term* pill,che_term* che,int tag)    //Â¼Èë¼ÇÂ¼
 {
 	record* temp = (record*)malloc(sizeof(record));
 	temp->next = NULL;
-	printf("ÇëÊäÈë¹ÒºÅ\n");
-	scanf("%d", &(temp->num_check)); getchar();
+	temp->num_check = tag + 1;
 	printf("\nÒÔÏÂÎªÊäÈë»¼ÕßĞÅÏ¢£¬Ã¿ÌõĞÅÏ¢ÒÔ»Ø³µ½áÊø\n\nÇëÊäÈë»¼ÕßĞÕÃû£º\n");
 	scanf("%s", &(temp->pat.name_pat));getchar();
 	while (!judge_name_pat(temp->pat.name_pat))
@@ -120,8 +106,6 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //Â¼Èë¼ÇÂ¼
 	strcpy(temp->doc.name_doc, tpdoc->name_doc);
 	strcpy(temp->doc.level, tpdoc->level);
 	strcpy(temp->doc.sub, tpdoc->sub);
-	/*printf("ÊäÈë¾ÍÕïÊ±¼ä£º\n");
-	scanf("%s", temp->out_doc);getchar();*/
 	strcpy(temp->out_doc , gettime());
 	printf("ÇëÊäÈë¸÷Ïî¼ì²é¼°Æä·ÑÓÃ,ÊäÈë¡°#¡±ÒÔ½áÊø\n");
 	(temp->tre.che.tag_check) = 0; 
@@ -196,13 +180,38 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //Â¼Èë¼ÇÂ¼
 		(temp->tre.pil.tag_pill)++;
 		i++;
 	}
-	printf("\nÇëÊäÈë¿ªÊ¼×¡ÔºÊ±¼ä£º\n");
-	scanf("%04d", &(temp->tre.hos.time_start));
-	printf("\nÇëÊäÈëÔ¤¼Æ³öÔºÊ±¼ä£º\n");
-	scanf("%04d", &(temp->tre.hos.time_end));
+	while (1)
+	{
+		printf("\nÇëÊäÈë¿ªÊ¼×¡ÔºÊ±¼ä£¨ËÄÎ»Êı×Ö£©£º\n");
+		scanf("%d", &(temp->tre.hos.time_start));
+		while (!JudgeDate(temp->tre.hos.time_start))
+		{
+			printf("ÈÕÆÚÊäÈë²»ºÏ·¨£¡Çë¼ì²éºóÖØĞÂÊäÈë£º\n");
+			scanf("%d", &(temp->tre.hos.time_start));
+		}
+		printf("\nÇëÊäÈëÔ¤¼Æ³öÔºÊ±¼ä£¨ËÄÎ»Êı×Ö£©£º\n");
+		scanf("%d", &(temp->tre.hos.time_end));
+		while (!JudgeDate(temp->tre.hos.time_end))
+		{
+			printf("ÈÕÆÚÊäÈë²»ºÏ·¨£¡Çë¼ì²éºóÖØĞÂÊäÈë£º\n");
+			scanf("%d", &(temp->tre.hos.time_end));
+		}
+		if (temp->tre.hos.time_end > temp->tre.hos.time_start)
+			break;
+		else
+			printf("³öÔºÊ±¼ä²»ÄÜÔçÓÚ×¡ÔºÊ±¼ä£¡ÇëÖØĞÂÊäÈë\n");
+	}
+	
 	printf("\nÇëÊäÈë½ÉÄÉ×¡ÔºÑº½ğ£º\n");
 	scanf("%d",&(temp->tre.hos.deposit));
-	//(temp->tre.hos.days_hos) = days_hosp(temp->tre.hos.time_start, temp->tre.hos.time_end);
+	int price = 200 * (date_turn(temp->tre.hos.time_end) - date_turn(temp->tre.hos.time_start));
+	while (temp->tre.hos.deposit < price)
+	{
+		printf("Ñº½ğ²»×ã£¡ÖÁÉÙÓ¦½ÉÄÉÑº½ğ%dÔª£¬ÇëÖØĞÂÊäÈë\n", price);
+		printf("\nÇëÊäÈë½ÉÄÉ×¡ÔºÑº½ğ£º\n");
+		scanf("%d", &(temp->tre.hos.deposit));
+		price = 200 * (date_turn(temp->tre.hos.time_end) - date_turn(temp->tre.hos.time_start));
+	}
 	printf("\nÕïÁÆ¼ÇÂ¼Â¼Èë³É¹¦£¡\n");
 	return temp;
 }
@@ -228,57 +237,69 @@ void outpatient_tag(struct record* head)   //²éÕÒ»¼ÕßÉí·İÖ¤ºÅ²¢Êä³ö
 
 void outpatient_name(struct record* head)		//¼ìË÷»¼ÕßĞÕÃû²¢Êä³ö
 {
-	char name[30];
-	printf("ÇëÊäÈëĞèÒª²éÑ¯µÄ»¼ÕßĞÕÃû£º\n");
-	scanf("%s", &name);
-	record* p;
-	p = head; 
-	int t, x = 0,m = 0;
-	while (strcmp((p->pat.name_pat) , name) == 0&& p != NULL)
-	{
-		x = x + 1;
-		printf("%d %s %d %s\n", x, ((p->pat).name_pat), ((p->pat).age),p->pat.tag_id);//Êä³ö»¼ÕßĞÅÏ¢²¿·Ö
-		p = p->next;
-	}
-	if (x == 0)
-	{
-		printf("²éÎŞ´ËÈË£¡\n");
-		return;
-	}
-	printf("ÇëÊäÈëĞèÒª²éÑ¯µÄ»¼ÕßĞòºÅ£º\n");
-	scanf("%d", &t);
-	for (strcmp((p->pat.name_pat), name) == 1; p != NULL; )
-	{
-		m = m + 1;
-		if (m == t) 
+	char name[30]; char patid[100][5];
+	bool tag = true; record* p; p = head;
+	int x = 0, y = 0, m = 0; char t[5];
+	while (tag) {
+		printf("ÇëÊäÈëĞèÒª²éÑ¯µÄ»¼ÕßĞÕÃû£º\n");
+		scanf("%s", &name);
+		while (p != NULL)
 		{
-			printf("%s %d ", (p->pat.name_pat), (p->pat.age));//Êä³ö»¼ÕßĞÅÏ¢²¿·Ö
-			printf("%s %s %s %d ", p->doc.name_doc, p->doc.level, p->doc.sub, p->doc.num_work);//Êä³öÒ½ÉúĞÅÏ¢²¿·Ö
-			printf("%s ", p->out_doc);                         //Êä³ö³öÕïÊ±¼ä
-			for (int i = 0; i < (p->tre.che.tag_check); i++)
-			{
-				printf("%s ", p->tre.che.type[i]);       //Êä³ö¼ì²éÀàĞÍ
-				printf("%f ", p->tre.che.cost_term[i]);  //Êä³öµ¥Ïî¼ì²éµÄ·ÑÓÃ
+			if (strcmp((p->pat.name_pat), name) == 0) {
+				x = x + 1;
+				for (int i = 0; i < x; i++) {
+					if (x == 1) {
+						strcpy(patid[0], p->pat.tag_id);
+						printf("%d %s %d %s\n", x, p->pat.name_pat, p->pat.age, p->pat.tag_id);
+						break;
+					}
+					if (strcmp(patid[x - 1], p->pat.tag_id) == 0) {
+						break;
+					}
+					else {
+						strcpy(patid[x], p->pat.tag_id);
+						printf("%d %s %d %s\n", x, p->pat.name_pat, p->pat.age, p->pat.tag_id);
+						break;
+					}
+				}
 			}
-			for (int i = 0; i < (p->tre.pil.tag_pill); i++)
-			{
-				printf("%s ", p->tre.pil.name_pill[i]);   //Êä³öÒ©Æ·Ãû³Æ
-				printf("%d ", p->tre.pil.cost_perpill[i]);//Êä³öÒ©Æ·µ¥¼Û
-				printf("%d ", p->tre.pil.num_pill[i]);    //Êä³öÒ©Æ·ÊıÁ¿
-			}
-			printf("%d  %d ", p->tre.hos.time_start, p->tre.hos.time_end);//Êä³ö×¡,³öÔºÊ±¼ä
-			printf("%d %d %d\n", p->tre.hos.days_hos, p->tre.hos.cost_hos, p->tre.hos.deposit);//Êä³ö×¡ÔºÌìÊı,×¡Ôº·ÑÓÃ,×¡ÔºÑº½ğ
+			p = p->next;
 		}
+		if (x == 0)
+		{
+			printf("²éÎŞ´ËÈË£¡ÄãÏëÒªÖØĞÂÊäÈëÂğ£¿\n1.ÊÇ   2·ñ\n");     //¹ùÖ¾Ôó
+			scanf("%d", &y);
+			if (y == 1) {
+				tag = true;
+			}
+			else
+				return;
+		}
+		else
+			tag = false;
+	}
+	if (!tag) {
+		outpatient_tag(head);
 	}
 	return;
 }
-
 void outsub_doc(struct record* head)   //¿ÆÊÒ¼ìË÷
 {
 	char sub_in[10];
 	record* p = head;
 	printf("ÇëÊäÈëĞèÒª²éÑ¯µÄ¿ÆÊÒ\n");
 	scanf("%s", sub_in);
+	while (strcmp(sub_in, "ÄÚ¿Æ") != 0 &&
+		strcmp(sub_in, "Íâ¿Æ") != 0 &&
+		strcmp(sub_in, "¶ù¿Æ") != 0 &&
+		strcmp(sub_in, "¸¾²ú¿Æ") != 0 &&
+		strcmp(sub_in, "´«È¾¿Æ") != 0 &&
+		strcmp(sub_in, "·ÅÉä¿Æ") != 0 &&
+		strcmp(sub_in, "Ö×Áö¿Æ") != 0)
+	{
+		printf("¿ÆÊÒ²»´æÔÚ£¡Çë¼ì²éºóÖØĞÂÊäÈë\n");
+		scanf("%s", sub_in);
+	}
 	while (p != NULL)
 	{
 		if (strcmp(sub_in, p->doc.sub) == 0)
@@ -309,84 +330,14 @@ void outname_doc(struct record* head)  //Ò½Éú¹¤ºÅ¼ìË÷
 	}
 }
 
-//void outtime_limit(struct record* head)        //Ê±¼ä¶Î¼ìË÷
-//{
-//	record* p, * q;
-//	p = head; q = p->next;
-//	char time_start[8], time_end[8];
-//	int start, end, tag_time;
-//	printf("ÇëÊäÈëÆğÊ¼Ê±¼äÒÔ¼°½áÊøÊ±¼ä£º\n");
-//	scanf("%s%s", &time_start, &time_end);
-//	start = date_turn(time_start); end = date_turn(time_end);
-//	
-//	int t, x = 0; t = 0;
-//	for (q != NULL;;) 
-//	{
-//		tag_time=date_turn(p->out_doc);
-//		for ((tag_time>=start)&&(tag_time<=end);;)
-//	    {
-//		    printf("%s ", p->out_doc);                         //Êä³ö³öÕïÊ±¼ä
-//		    printf("%d %s %s %s", p->doc.num_work, p->doc.name_doc, p->doc.sub, p->doc.level);//Êä³öÒ½ÉúĞÅÏ¢²¿·Ö
-//		    printf("%s %d ", (p->pat.name_pat), (p->pat.age));//Êä³ö»¼ÕßĞÅÏ¢²¿·Ö
-//		    for (int i = 0; i < (p->tre.che.tag_check); i++)
-//		    {
-//			    printf("%s ", p->tre.che.type[i]);       //Êä³ö¼ì²éÀàĞÍ
-//			    printf("%f ", p->tre.che.cost_term[i]);  //Êä³öµ¥Ïî¼ì²éµÄ·ÑÓÃ
-//		    }
-//		    for (int i = 0; i < (p->tre.pil.tag_pill); i++)
-//		    {
-//			    printf("%s ", p->tre.pil.name_pill[i]);   //Êä³öÒ©Æ·Ãû³Æ
-//			    printf("%d ", p->tre.pil.cost_perpill[i]);//Êä³öÒ©Æ·µ¥¼Û
-//			    printf("%d ", p->tre.pil.num_pill[i]);    //Êä³öÒ©Æ·ÊıÁ¿
-//		    }
-//		    printf("%d  %d ", p->tre.hos.time_start, p->tre.hos.time_end);//Êä³ö×¡,³öÔºÊ±¼ä
-//		    printf("%d %d %d\n", p->tre.hos.days_hos, p->tre.hos.cost_hos, p->tre.hos.deposit);//Êä³ö×¡ÔºÌìÊı,×¡Ôº·ÑÓÃ,×¡ÔºÑº½ğ
-//	    }
-//	}
-//	return;
-//}
-
-//void output(struct record* head)
-//{
-//	record* p, * q;
-//	p = head; q = p->next;
-//	int x; x = 0;
-//	while (p->next!=NULL)
-//	{
-//		x = x + 1;
-//		printf("%d ", x);
-//		printf("%s %d ", (p->pat.name_pat), (p->pat.age));//Êä³ö»¼ÕßĞÅÏ¢²¿·Ö
-//		printf("%s %s %s %d ", p->doc.name_doc, p->doc.level, p->doc.sub, p->doc.num_work);//Êä³öÒ½ÉúĞÅÏ¢²¿·Ö
-//		printf("%s ", p->out_doc);                         //Êä³ö³öÕïÊ±¼ä
-//		for (int i = 0; i < (p->tre.che.tag_check); i++)
-//		{
-//			printf("%s ", p->tre.che.type[i]);       //Êä³ö¼ì²éÀàĞÍ
-//			printf("%f ", p->tre.che.cost_term[i]);  //Êä³öµ¥Ïî¼ì²éµÄ·ÑÓÃ
-//		}
-//		for (int i = 0; i < (p->tre.pil.tag_pill); i++)
-//		{
-//			printf("%s ", p->tre.pil.name_pill[i]);   //Êä³öÒ©Æ·Ãû³Æ
-//			printf("%d ", p->tre.pil.cost_perpill[i]);//Êä³öÒ©Æ·µ¥¼Û
-//			printf("%d ", p->tre.pil.num_pill[i]);    //Êä³öÒ©Æ·ÊıÁ¿
-//		}
-//		printf("%d  %d ", p->tre.hos.time_start, p->tre.hos.time_end);//Êä³ö×¡,³öÔºÊ±¼ä
-//		printf("%d %d %d\n", p->tre.hos.days_hos, p->tre.hos.cost_hos, p->tre.hos.deposit);//Êä³ö×¡ÔºÌìÊı,×¡Ôº·ÑÓÃ,×¡ÔºÑº½ğ
-//		if (p->next== NULL)
-//			return;
-//		else
-//			p = p->next; 
-//		
-//	}
-//	return;
-//}
 
 void del_record(record* head,record* t)   //É¾³ı²Ù×÷
 {
 	record* p = head;
 	record* pre = NULL;
 	while (p != NULL && p != t) {
-		p = p->next;
 		pre = p;
+		p = p->next;
 	}
 	if (p == t) {
 		pre->next = p->next;
@@ -395,49 +346,6 @@ void del_record(record* head,record* t)   //É¾³ı²Ù×÷
 	}
 }
 
-//void input(struct record* p)
-//{
-//	printf("ÇëÊäÈë»¼ÕßĞÅÏ¢\n");
-//	scanf("%s%d", &(p->pat.name_pat), &(p->pat.age));
-//	printf("ÇëÊäÈë¹ÒºÅ\n");
-//	scanf("%d", &(p->num_check));
-//	printf("ÇëÊäÈëÒ½ÉúĞÅÏ¢\n");
-//	scanf("%s%s%s%d", &(p->doc.name_doc), &(p->doc.level), &(p->doc.sub), &(p->doc.num_work));
-//	printf("ÇëÊäÈë³öÕïÊ±¼ä\n");
-//	scanf("%s", &(p->out_doc[8]));
-//	printf("ÇëÊäÈë¸÷Ïî¼ì²é¼°Æä·ÑÓÃ,ÈôÊäÈë½áÊøÇë¼üÈë¡®|¡¯\n");
-//	(p->tre.che.tag_check) = 0; bool flag_che = true; int i = 0;
-//	while (flag_che)
-//	{
-//		scanf("%s", &(p->tre.che.type[i]));
-//		if ((p->tre.che.type[i][0]) == '|')
-//		{
-//			flag_che = false;
-//			(p->tre.che.cost_check) = sumcheck((p->tre.che.tag_check), (p->tre.che.cost_term));
-//			break;
-//		}
-//		scanf("%f", &(p->tre.che.cost_term[i]));
-//		(p->tre.che.tag_check)++;
-//	}
-//	printf("ÇëÊäÈë¸÷Ò©Æ·Ãû³Æ¼°ÆäÊıÁ¿ºÍµ¥¼Û,ÈôÊäÈë½áÊøÇë¼üÈë¡®|¡¯\n");
-//	(p->tre.pil.tag_pill) = 0; bool flag_pil = true; i = 0;
-//	while (flag_pil)
-//	{
-//		scanf("%s", &(p->tre.pil.name_pill[i]));
-//		if ((p->tre.pil.name_pill[i][0]) == '|')
-//		{
-//			flag_pil = false;
-//			(p->tre.pil.cost_pill) = sumpill(p->tre.pil.tag_pill, p->tre.pil.cost_perpill, p->tre.pil.num_pill);
-//			break;
-//		}
-//		scanf("%d%d", &(p->tre.pil.cost_perpill[i]), &(p->tre.pil.num_pill[i]));
-//		(p->tre.pil.tag_pill)++;
-//	}
-//	printf("ÇëÊäÈë¿ªÊ¼×¡ÔºÊ±¼ä£¬Ô¤¼Æ³öÔºÊ±¼ä¼°ÒÑ½»ÄÉµÄ×¡ÔºÑº½ğ\n");
-//	scanf("%d%d%d", &(p->tre.hos.time_start), &(p->tre.hos.time_end), &(p->tre.hos.deposit));
-//	(p->tre.hos.days_hos) = days_hosp(p->tre.hos.time_start, p->tre.hos.time_end);
-//	return;
-//}
 
 void alter_record(record* head,record* t,doctor* doc,pill_term* pill,che_term* che)   //ĞŞ¸Ä²Ù×÷
 {
@@ -446,15 +354,15 @@ void alter_record(record* head,record* t,doctor* doc,pill_term* pill,che_term* c
 	record* after = NULL;
 	while (p != NULL && p != t)
 	{
-		p = p->next;
 		pre = p;
+		p = p->next;
 	}
 	if (p == t)
 	{
 		int tp = p->num_check;//ÔİÊ±±£´æ¹ÒºÅ
 		after = p->next;
 		printf("ÇëÖØĞÂÊäÈëÕïÁÆ¼ÇÂ¼£¡\n");
-		p = getrecord(doc, pill, che);
+		p = getrecord(doc, pill, che,999);
 		p->num_check = tp;
 		pre->next = p;
 		p->next = after;
@@ -471,7 +379,7 @@ void statistics(record* head)    //ÓªÒµ¶î
 		turn = turn+ (p->tre.che.cost_check) + (p->tre.pil.cost_pill) + (float)(p->tre.hos.cost_hos);
 		p = p->next;
 	}
-	printf("Ò½ÔºÏÖÓĞ×Ê½ğ£º%.2dÔª", turn);
+	printf("Ò½ÔºÏÖÓĞ×Ê½ğ£º%.2fÔª\n", turn);
 }
 
 void yearchange(int a) {                              //¸Ä±äÏµÍ³Äê·İ
@@ -601,48 +509,88 @@ doctor* judge_num_work(int num, doctor* s) {					//ÅĞ¶ÏÒ½Éú¹¤ºÅ
 	return NULL;
 }
 
-bool time(int a, int b) {                             //ÅĞ¶ÏÊ±¼ä
-	char m[9]; int x, y, i, j;
-	sprintf(m, "%d", a);
-	x = (m[0] * 10) + m[1];
-	y = (m[2] * 10) + m[3];
-	i = (m[4] * 10) + m[5];
-	j = (m[6] * 10) + m[7];
-	if (x < 1 || x > 12 || y < 1 || i > 24 || j > 59) {
+bool JudgeDate(int a) 
+{ 
+	int mon, day;
+	mon = a / 100;
+	day = a % 100;
+	if (a < 101)
 		return false;
-	}
-	if (x == 1 || x == 3 || x == 5 || x == 7 || x == 8 || x == 10 || x == 12) {
-		if (y > 31) {
+	if (mon < 1 || mon>12)
+		return false;
+	if (mon == 1 || mon == 3 || mon == 5 || mon == 7 || mon == 8 || mon == 10 || mon == 12) {
+		if (day < 1 || day>31)
 			return false;
+		else
+			return true;
+	}
+	if (mon == 4 || mon == 6 || mon == 9 || mon == 11) {
+		if (day < 1 || day>30)
+			return false;
+		else
+			return true;
+	}
+	if (mon == 2) {
+		if (judge_year(turnyear(getyear()))) {
+			if (day < 1 || day>29)
+				return false;
+			else
+				return true;
+		}
+		else {
+			if (day < 1 || day>28)
+				return false;
+			else
+				return true;
 		}
 	}
-	if (x == 2 || x == 4 || x == 6 || x == 9 || x == 11) {
-		if (y > 30) {
-			return false;
-		}
-	}
-	if (judge_year(b)) {
-		if (x == 2 || y > 29) {
-			return false;
-		}
-	}
-	else {
-		if (x == 2 || y > 28) {
-			return false;
-		}
-	}
-	return true;
 }
 
-//bool judge_time(record* p) {
-//	if (!(time(p->tre.hos.time_start, year))) {
-//		return false;
-//	}
-//	if (!(time(p->tre.hos.time_end, year))) {
-//		return false;
-//	}
-//	if (days_hosp(p->tre.hos.time_start, p->tre.hos.time_end) < 1) {
-//		return false;
-//	}
-//	return true;
-//}
+void DoctorState(int workNum, doctor* head)
+{
+	doctor* p = head;
+	while (p != NULL && workNum != p->num_work) {
+		p = p->next;
+	}
+	p->state++;
+}
+
+void outtime_limit(struct record* head)        //Ê±¼ä¶Î¼ìË÷
+{
+	record* p = head;
+	int start, end, tag_time;
+	while (1)
+	{
+		printf("ÇëÊäÈëÆğÊ¼Ê±¼ä(4Î»ÕûÊı£¬¾«È·µ½ÈÕ)£º\n");
+		scanf("%d", &start);
+		while (!JudgeDate(start))
+		{
+			printf("ÈÕÆÚ²»ºÏ·¨£¡ÇëÖØĞÂÊäÈë\n");
+			printf("ÇëÊäÈëÆğÊ¼Ê±¼ä(4Î»ÕûÊı£¬¾«È·µ½ÈÕ)£º\n");
+			scanf("%d", &start);
+		}
+		printf("ÇëÊäÈëÖÕÖ¹Ê±¼ä(4Î»ÕûÊı£¬¾«È·µ½ÈÕ)£º\n");
+		scanf("%d", &end);
+		while (!JudgeDate(end))
+		{
+			printf("ÈÕÆÚ²»ºÏ·¨£¡ÇëÖØĞÂÊäÈë\n");
+			printf("ÇëÊäÈëÖÕÖ¹Ê±¼ä(4Î»ÕûÊı£¬¾«È·µ½ÈÕ)£º\n");
+			scanf("%d", &end);
+		}
+		if (start < end)
+			break;
+		else
+			printf("ÖÕÖ¹ÈÕÆÚ±ØĞëÔÚÆğÊ¼Ê±¼äÖ®ºó£¡ÇëÖØĞÂÊäÈë");
+	}
+	while (p != NULL)
+	{
+		tag_time = turndate(p->out_doc);
+		if ((tag_time >= start) && (tag_time <= end))
+		{
+			singleprint(p);
+		}
+		p = p->next;
+	}
+	if (p == NULL)
+		printf("Î´ÕÒµ½¸ÃÊ±¼ä¶ÎÄÚµÄÕïÁÆ¼ÇÂ¼£¡");
+}
