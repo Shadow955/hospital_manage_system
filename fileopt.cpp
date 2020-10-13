@@ -29,57 +29,6 @@ int openfile() {															//文件读入函数，成功返回1，失败返回0
 		return 1;
 	}
 }
-//DiagnosisRecord* ReadFromDiagnosisFile(const char* readPath) {
-//	DiagnosisRecord* res = (DiagnosisRecord*)malloc(sizeof(DiagnosisRecord));
-//	res->next = NULL;
-//	FILE* fileReadPointer;
-//	if ((fileReadPointer = fopen(readPath, "r")) == NULL) {
-//		printf("文件路径不正确,请重新输入!\n");
-//		return NULL;
-//	}
-//	while (!feof(fileReadPointer)) {
-//		//printf("开始读入\n");
-//		DiagnosisRecord* nowRecord = InRecord(fileReadPointer);
-//		//printf("读入结束\n");
-//		if (!nowRecord) continue;
-//		pushBackDiagnosisList(res, nowRecord);
-//		if (nowRecord->diagnosisSituation.setFlag == 0) {
-//			hospitalFund.checkCost.yuan += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.checkRecord.totalCost.yuan;
-//			hospitalFund.checkCost.jiao += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.checkRecord.totalCost.jiao;
-//			hospitalFund.checkCost.fen += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.checkRecord.totalCost.fen;
-//		}
-//		else if (nowRecord->diagnosisSituation.setFlag == 1) {
-//			hospitalFund.drugCost.yuan += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.prescribeRecord.totalCost.yuan;
-//			hospitalFund.drugCost.jiao += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.prescribeRecord.totalCost.jiao;
-//			hospitalFund.drugCost.fen += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.prescribeRecord.totalCost.fen;
-//		}
-//		else if (nowRecord->diagnosisSituation.setFlag == 2) {
-//			hospitalFund.inHosipitalCost.yuan += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.inHospitalRecord.costByNow.yuan;
-//			hospitalFund.inHosipitalCost.jiao += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.inHospitalRecord.costByNow.jiao;
-//			hospitalFund.inHosipitalCost.fen += nowRecord->diagnosisSituation.
-//				diagnosisSituationInfo.inHospitalRecord.costByNow.fen;
-//		}
-//	}
-//	int CF = 0;//进位寄存器
-//	hospitalFund.allCost.fen += hospitalFund.checkCost.fen +
-//		hospitalFund.drugCost.fen + hospitalFund.inHosipitalCost.fen;
-//	CF = hospitalFund.allCost.fen / 10; hospitalFund.allCost.fen %= 10;
-//	hospitalFund.allCost.jiao += hospitalFund.checkCost.jiao +
-//		hospitalFund.drugCost.jiao + hospitalFund.inHosipitalCost.jiao + CF;
-//	CF = hospitalFund.allCost.jiao / 10; hospitalFund.allCost.jiao %= 10;
-//	hospitalFund.allCost.yuan += hospitalFund.checkCost.yuan +
-//		hospitalFund.drugCost.yuan + hospitalFund.inHosipitalCost.yuan + CF;
-//	fclose(fileReadPointer);
-//	return res;
-//}
 
 char* gettime()
 {
@@ -88,9 +37,30 @@ char* gettime()
 	//ctime（）返回字符串类型的 time_t 变量格式
 	char* Time = ctime(&t);
 	Time += 4;
-	Time[11] = '\0';
+	Time[12] = '\0';
 	return Time;
 }
+
+char* getyear()
+{
+	time(&t);
+	char* year = ctime(&t);
+	year += 20;
+	year[4] = '\0';
+	return year;
+}
+
+int turnyear(char a[5])
+{
+	char * s;
+	char b[5];
+	s = a;
+	int m;
+	strcpy(b, s);
+	m = ((int)a[0] - 48) * 1000 + ((int)a[1] - 48) * 100 + ((int)a[2] - 48) * 10 + ((int)a[3] - 48);
+	return m;
+}
+
 record* read_and_link() 
 {
 	record* rec_head = (record*)malloc(sizeof(record));		//建立头节点
@@ -122,6 +92,8 @@ record* read_and_link()
 			fscanf(file_rec, "%f", &tp->tre.che.cost_term[i]);
 			i++;
 		}
+		tp->tre.che.tag_check = i;
+		tp->tre.che.cost_check = sumcheck(tp->tre.che.tag_check, tp->tre.che.cost_term);
 		while(1)//在读至#之前，循环读入药品单价与数量
 		{
 			fscanf(file_rec, "%s", tp->tre.pil.name_pill[j]);
@@ -132,12 +104,14 @@ record* read_and_link()
 				, &tp->tre.pil.num_pill[j]);
 			j++;
 		}
+		tp->tre.pil.tag_pill = j;
+		tp->tre.pil.cost_pill = sumpill(tp->tre.pil.tag_pill, tp->tre.pil.cost_perpill, tp->tre.pil.num_pill);
 		fscanf(file_rec, "%d%d%d"									//读入住院信息部分
 			, &tp->tre.hos.time_start
 			, &tp->tre.hos.time_end
 			, &tp->tre.hos.deposit);
-	
-		tp->next = (record*)malloc(sizeof(struct record));
+		tp->tre.hos.cost_hos = cost_hos(tp->tre.hos.time_start, tp->tre.hos.time_end, turndate(gettime()));
+		tp->next = (record*)malloc(sizeof(record));
 		tp->next->next = NULL;
 		pre = tp;
 		tp = tp->next;
@@ -225,7 +199,7 @@ void printf_number(record* rec_head,pill_term* pill_head,che_term* che_head,doct
 	case 3: 
 		outpatient_tag(rec_head); break;//打印某患者历史诊疗记录
 	case 4: 
-		outtime_limit(rec_head); break;//打印某段时间内的诊疗记录
+		//outtime_limit(rec_head); break;//打印某段时间内的诊疗记录
 	case 5:
 		docprint(doc_head); break;
 	case 6:
@@ -373,3 +347,83 @@ void save(record* head)
 	//fclose(file_rec);
 	printf("\n保存成功！\n");
 }
+
+int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
+{
+	char* s = data;
+	int month_num = 0, m = 0, n = 0, p = 0;
+	char b[4], c[3], d[3];
+	strcpy(b, s);
+	b[3] = '\0';
+	s += 4;
+	strcpy(c, s);
+	c[2] = '\0';
+	s += 3;
+	strcpy(d, s);
+	d[2] = '\0';
+	n = (int)(c[0] - 48);
+	p = (int)(c[1] - 48);
+	m = ((int)d[0] - 48) * 10 + (int)d[1] - 48;
+	if (strcmp(b, "Jan") == 0) {
+		if (m >= 8)
+			month_num += 100 + n * 10 + p;
+		else month_num += 100 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Feb") == 0) {
+		if (m >= 8)
+			month_num += 200 + n * 10 + p;
+		else month_num += 200 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Mar") == 0) {
+		if (m >= 8)
+			month_num += 300 + n * 10 + p;
+		else month_num += 300 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Apr") == 0) {
+		if (m >= 8)
+			month_num += 400 + n * 10 + p;
+		else month_num += 400 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "May") == 0) {
+		if (m >= 8)
+			month_num += 500 + n * 10 + p;
+		else month_num += 500 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Jun") == 0) {
+		if (m >= 8)
+			month_num = 600 + n * 10 + p;
+		else month_num = 600 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Jul") == 0) {
+		if (m >= 8)
+			month_num = 700 + n * 10 + p;
+		else month_num = 700 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Aug") == 0) {
+		if (m >= 8)
+			month_num = 800 + n * 10 + p;
+		else month_num = 800 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Sep") == 0) {
+		if (m >= 8)
+			month_num = 900 + n * 10 + p;
+		else month_num = 900 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Oct") == 0) {
+		if (m >= 8)
+			month_num += 1000 + n * 10 + p;
+		else month_num += 1000 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Nov") == 0) {
+		if (m >= 8)
+			month_num = 1100 + n * 10 + p;
+		else month_num = 1100 + n * 10 + p - 1;
+	}
+	if (strcmp(b, "Dec") == 0) {
+		if (m >= 8)
+			month_num = 1200 + n * 10 + p;
+		else month_num = 1200 + n * 10 + p - 1;
+	}
+	return month_num;
+}
+

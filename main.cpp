@@ -20,6 +20,7 @@ int main() {
 
 	printf("当前时间：");
 	char*T=gettime();
+	char* year = getyear();
 	printf("%s\n", T);
 
 	if (!openfile())									//开始时先执行文件读入函数
