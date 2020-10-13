@@ -24,25 +24,25 @@ void outname_doc(struct record* head);  //医生工号检索
 
 //void output(struct record* head); //输出诊疗记录
 
-void del_record(struct record* head); //删除操作
+void del_record(record*,record*); //删除操作
 
 //void input(struct record* p);  //录入诊疗记录
 
-void alter_record(struct record* head);  //修改操作
+void alter_record(record*,record*,doctor*,pill_term*,che_term*);  //修改操作
 
-float statistics(struct record* head);   //营业额
+void statistics(struct record* head);   //营业额
 
 void yearchange(int);
 
 bool judge_year(int a);
 
-bool judge_name_pat(record* p);
+bool judge_name_pat(char*);
 
-bool judge_age(record* p);
+bool judge_age(int);
 
-bool judge_sex(record* p);
+bool judge_sex(char*);
 
-bool judge_tag_id(record* p);
+bool judge_tag_id(char*,char*);
 
 bool judge_num_check(record* p);
 

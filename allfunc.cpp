@@ -79,21 +79,35 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //录入记录
 	record* temp = (record*)malloc(sizeof(record));
 	temp->next = NULL;
 	printf("请输入挂号\n");
-	scanf("%d", &(temp->num_check));
+	scanf("%d", &(temp->num_check)); getchar();
 	printf("\n以下为输入患者信息，每条信息以回车结束\n\n请输入患者姓名：\n");
 	scanf("%s", &(temp->pat.name_pat));getchar();
+	while (!judge_name_pat(temp->pat.name_pat))
+	{
+		printf("姓名输入错误！请检查后重新输入！目前仅支持中文输入\n");
+		scanf("%s", &(temp->pat.name_pat));getchar();
+	}
 	printf("性别：\n");
 	scanf("%s", temp->pat.sex);getchar();
+	while (!judge_sex(temp->pat.sex))
+	{
+		printf("性别输入错误！请检查后重新输入\n");
+		scanf("%s", &(temp->pat.sex)); getchar();
+	}
 	printf("年龄：\n");
-	scanf("%d", &temp->pat.age);
+	scanf("%d", &temp->pat.age); getchar();
+	while (!judge_age(temp->pat.age))
+	{
+		printf("年龄输入错误！请输入1-149的整数 输入小数将向下取证\n");
+		scanf("%d", &temp->pat.age); getchar();
+	}
 	printf("身份证号后四位：\n");
 	scanf("%s", temp->pat.tag_id);getchar();
-	//printf("\n以下为输入医生信息，每条信息以回车结束\n\n请输入主治医生姓名：\n");
-	//scanf("%s",&(temp->doc.name_doc));getchar();
-	//printf("医生级别：\n");
-	//scanf("%s", temp->doc.level);getchar();
-	//printf("医生科室：\n");
-	//scanf("%s", temp->doc.sub);getchar();
+	while (!judge_tag_id(temp->pat.sex, temp->pat.tag_id))
+	{
+		printf("身份证不符合规范！请检查后重新输入！尾数为x请小写\n");
+		scanf("%s", temp->pat.tag_id); getchar();
+	}
 	printf("请输入医生工号：\n");
 	scanf("%d", &temp->doc.num_work);getchar();
 	doctor* tpdoc = judge_num_work(temp->doc.num_work, doc);
@@ -137,10 +151,9 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //录入记录
 				}
 				tpche = judge_che_name(temp->tre.che.type[i], che);
 			}
-			temp->tre.che.cost_term[i] = tpche->che_price;
+			if(tpche!=NULL)
+				temp->tre.che.cost_term[i] = tpche->che_price;
 		}
-		//printf("输入该项检查费用：\n");
-		//scanf("%f", &(temp->tre.che.cost_term[i]));
 		(temp->tre.che.tag_check)++;
 		i++;
 	}
@@ -171,14 +184,15 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che)    //录入记录
 					(temp->tre.pil.cost_pill) = sumpill(temp->tre.pil.tag_pill, temp->tre.pil.cost_perpill, temp->tre.pil.num_pill);
 					break;
 				}
-				tppill = judge_pill_name(temp->tre.pil.name_pill[i], pill);
+					tppill = judge_pill_name(temp->tre.pil.name_pill[i], pill);
 			}
-			temp->tre.pil.cost_perpill[i] = tppill->pill_price;
+			if(tppill!=NULL)
+				temp->tre.pil.cost_perpill[i] = tppill->pill_price;
 		}
-		//printf("输入药品单价：\n");
-		//scanf("%f", &(temp->tre.pil.cost_perpill[i]));
-		printf("输入药品数量：\n");
-		scanf("%d", &temp->tre.pil.num_pill[i]);
+		if (strcmp(temp->tre.pil.name_pill[i],"#")!=0) {
+			printf("输入药品数量：\n");
+			scanf("%d", &temp->tre.pil.num_pill[i]);
+		}
 		(temp->tre.pil.tag_pill)++;
 		i++;
 	}
@@ -366,29 +380,19 @@ void outname_doc(struct record* head)  //医生工号检索
 //	return;
 //}
 
-void del_record(struct record* head)   //删除操作
+void del_record(record* head,record* t)   //删除操作
 {
-	record* p, * q,* r;
-	p = head; q = p->next; r->next = p;
-	int x, y; y = 0;
-	//output(head);
-	printf("请选择需要删除的记录");
-	scanf("%d", &x);
-	for (p != NULL;;)
-	{
-		y = y + 1;
-		if (x == y)
-		{
-			r->next = q; 
-			free(p);
-			printf("删除成功！");
-		}
-		else
-		{
-			r = p; p = q; q = q->next;
-		}
+	record* p = head;
+	record* pre = NULL;
+	while (p != NULL && p != t) {
+		p = p->next;
+		pre = p;
 	}
-	return;
+	if (p == t) {
+		pre->next = p->next;
+		free(p);
+		printf("删除成功！");
+	}
 }
 
 //void input(struct record* p)
@@ -435,40 +439,39 @@ void del_record(struct record* head)   //删除操作
 //	return;
 //}
 
-void alter_record(struct record* head)   //修改操作
+void alter_record(record* head,record* t,doctor* doc,pill_term* pill,che_term* che)   //修改操作
 {
-	record* p, * q, * r;
-	p = head; q = p->next; r->next = p;
-	int x, y; y = 0;
-	//output(head);
-	printf("请选择需要修改的记录");
-	scanf("%d", &x);
-	for (p != NULL;;)
+	record* p = head;
+	record* pre = NULL;
+	record* after = NULL;
+	while (p != NULL && p != t)
 	{
-		y = y + 1;
-		if (x == y)
-		{
-			printf("撤销成功！请重新输入：\n");
-		}
-		else
-		{
-			r = p; p = q; q = q->next;
-		}
+		p = p->next;
+		pre = p;
 	}
-	return;
+	if (p == t)
+	{
+		int tp = p->num_check;//暂时保存挂号
+		after = p->next;
+		printf("请重新输入诊疗记录！\n");
+		p = getrecord(doc, pill, che);
+		p->num_check = tp;
+		pre->next = p;
+		p->next = after;
+		printf("诊疗记录修改成功！\n");
+	}
 }
 
-float statistics(struct record* head)    //营业额
+void statistics(record* head)    //营业额
 {
 	float turn = 0;
-	record* p, * q;
-	p = head; q = p->next;
-	for (p != NULL;;)
+	record* p = head; 
+	while (p != NULL)
 	{
 		turn = turn+ (p->tre.che.cost_check) + (p->tre.pil.cost_pill) + (float)(p->tre.hos.cost_hos);
-		p = q; q = q->next;
+		p = p->next;
 	}
-	return turn;
+	printf("医院现有资金：%.2d元", turn);
 }
 
 void yearchange(int a) {                              //改变系统年份
@@ -492,50 +495,56 @@ bool judge_year(int a) {                             //判断闰年
 	}
 }
 
-bool judge_name_pat(record* p) {                 //判断姓名
-	int t = 0;
-	for (t = 0; ((p->pat.name_pat[t]) != '/0') && t < 50; t++) {
-		if ((p->pat.name_pat[t]) >= 32 && (p->pat.name_pat[t]) <= 64) {
-			return false;
+bool judge_name_pat(char* name) {                 //判断姓名
+	bool flag = true;
+	int i = 0;
+	while (name[i] != '\0') {
+		if (name[i] >= 0) {
+			flag = false;
+			break;
 		}
-		else if ((p->pat.name_pat[t]) >= 91 && (p->pat.name_pat[t]) <= 96) {
-			return false;
-		}
-		else if ((p->pat.name_pat[t]) >= 123 && (p->pat.name_pat[t]) <= 126) {
-			return false;
-		}
+		i++;
 	}
-	return true;
+	return flag;
 }
 
-bool judge_age(record* p) {                            //判断年龄
-	if ((p->pat.age) < 0 && (p->pat.age) > 150) {
+bool judge_age(int age) {                            //判断年龄
+	if (age < 0 || age > 150) {
 		return false;
 	}
-	return true;
+	else
+		return true;
 }
 
-bool judge_sex(record* p) {                        //判断性别
-	if (strcmp(p->pat.sex, "男") != 0 || strcmp(p->pat.sex, "女") != 0) {
+bool judge_sex(char* sex) {                        //判断性别
+	if (strcmp(sex, "男") != 0 && strcmp(sex, "女") != 0) {
 		return false;
 	}
-	return true;
+	else
+		return true;
 }
 
-bool judge_tag_id(record* p) {                         //判断身份识别码
+bool judge_tag_id(char* sex,char* id) {                         //判断身份证尾号
 	int t = 0;
+	bool flag = true;
 	for (t = 0; t < 3; t++) {
-		if ((p->pat.tag_id[t]) <= '0' && (p->pat.tag_id[t]) >= '9') {
-			return false;
+		if ((id[t]) <= '0' || (id[t]) >= '9') {
+			flag=false;
+			return flag;
 		}
 	}
-	if (strcmp(p->pat.sex, "男") == 0 && (p->pat.tag_id[3]) % 2 == 0) {
-		return false;
+	if (id[3] <= '0' || id[3] >= '9') {
+		flag = false;
+		if (id[3] == 'x')
+			flag = true;
 	}
-	if (strcmp(p->pat.sex, "女") == 0 && (p->pat.tag_id[3]) % 2 != 0) {
-		return false;
+	if (strcmp(sex, "男") == 0 && (id[2]) % 2 == 0) {
+		flag=false;
 	}
-	return true;
+	if (strcmp(sex, "女") == 0 && (id[2]) % 2 != 0) {
+		flag=false;
+	}
+	return flag;
 }
 
 bool judge_num_check(record* p) {                  //判断挂号

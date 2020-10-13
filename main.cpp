@@ -1,4 +1,4 @@
-#define funds = 0;
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string>
@@ -46,9 +46,9 @@ int main() {
 			case 1: 
 				p->next=getrecord(doc_head, pill_head, che_head); break;  //录入诊疗记录
 			case 2: 
-				alter_record(rec_head); break;  //修改诊疗记录
+				//alter_record(rec_head); break;  //修改诊疗记录
 			case 3: 
-				del_record(rec_head); break;  //删除诊疗记录
+				//del_record(rec_head); break;  //删除诊疗记录
 			case 4: 
 				printf_number(rec_head, pill_head, che_head, doc_head); break;  //确认打印信息
 			case 5: 

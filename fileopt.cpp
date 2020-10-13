@@ -348,18 +348,98 @@ void save(record* head)
 	printf("\n保存成功！\n");
 }
 
+//int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
+//{
+//	char* s = data;
+//	int month_num = 0, m = 0, n = 0, p = 0;
+//	char b[4], c[3], d[3];
+//	strcpy(b, s);
+//	b[3] = '\0';
+//	s += 4;
+//	strcpy(c, s);
+//	c[2] = '\0';
+//	s += 3;
+//	strcpy(d, s);
+//	d[2] = '\0';
+//	n = (int)(c[0] - 48);
+//	p = (int)(c[1] - 48);
+//	m = ((int)d[0] - 48) * 10 + (int)d[1] - 48;
+//	if (strcmp(b, "Jan") == 0) {
+//		if (m >= 8)
+//			month_num += 100 + n * 10 + p;
+//		else month_num += 100 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Feb") == 0) {
+//		if (m >= 8)
+//			month_num += 200 + n * 10 + p;
+//		else month_num += 200 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Mar") == 0) {
+//		if (m >= 8)
+//			month_num += 300 + n * 10 + p;
+//		else month_num += 300 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Apr") == 0) {
+//		if (m >= 8)
+//			month_num += 400 + n * 10 + p;
+//		else month_num += 400 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "May") == 0) {
+//		if (m >= 8)
+//			month_num += 500 + n * 10 + p;
+//		else month_num += 500 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Jun") == 0) {
+//		if (m >= 8)
+//			month_num = 600 + n * 10 + p;
+//		else month_num = 600 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Jul") == 0) {
+//		if (m >= 8)
+//			month_num = 700 + n * 10 + p;
+//		else month_num = 700 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Aug") == 0) {
+//		if (m >= 8)
+//			month_num = 800 + n * 10 + p;
+//		else month_num = 800 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Sep") == 0) {
+//		if (m >= 8)
+//			month_num = 900 + n * 10 + p;
+//		else month_num = 900 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Oct") == 0) {
+//		if (m >= 8)
+//			month_num += 1000 + n * 10 + p;
+//		else month_num += 1000 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Nov") == 0) {
+//		if (m >= 8)
+//			month_num = 1100 + n * 10 + p;
+//		else month_num = 1100 + n * 10 + p - 1;
+//	}
+//	if (strcmp(b, "Dec") == 0) {
+//		if (m >= 8)
+//			month_num = 1200 + n * 10 + p;
+//		else month_num = 1200 + n * 10 + p - 1;
+//	}
+//	return month_num;
+//}
+
 int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
 {
 	char* s = data;
-	int month_num = 0, m = 0, n = 0, p = 0;
-	char b[4], c[3], d[3];
-	strcpy(b, s);
+	int month_num = 0, m = 0, n = 0, p = 0, i;
+	char b[5], c[3], d[3];
+	for (i = 0; i < 3; i++)
+		b[i] = *(s + i);
 	b[3] = '\0';
-	s += 4;
-	strcpy(c, s);
+	for (i = 4; i < 6; i++)
+		c[i - 4] = *(s + i);
 	c[2] = '\0';
-	s += 3;
-	strcpy(d, s);
+	for (i = 7; i < 9; i++)
+		d[i - 7] = *(s + i);
 	d[2] = '\0';
 	n = (int)(c[0] - 48);
 	p = (int)(c[1] - 48);
@@ -426,4 +506,3 @@ int turndate(char data[20])  //转化日期字符串为四位数字（不到8点则-1）
 	}
 	return month_num;
 }
-
