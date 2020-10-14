@@ -290,6 +290,7 @@ void search(record*head,doctor*doc,pill_term*pill,che_term*che)
 			p = p->next;
 		}
 		}
+	singleprint(p);
 	printf("搜索成功！请输入数字使用对应操作，按0取消操作并返回上层\n");
 	printf("1:修改该诊疗记录\n2:删除该诊疗记录\n");
 	int num;

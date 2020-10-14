@@ -201,10 +201,15 @@ record* getrecord(doctor* doc,pill_term* pill,che_term* che,int tag)    //录入记
 		else
 			printf("出院时间不能早于住院时间！请重新输入\n");
 	}
-	
+	int now = turndate(gettime());
+	temp->tre.hos.cost_hos = cost_hos(date_turn(temp->tre.hos.time_start), date_turn(temp->tre.hos.time_end), date_turn(now));
+	if (now <= temp->tre.hos.time_end)
+		DoctorState(temp->doc.num_work, doc);
 	printf("\n请输入缴纳住院押金：\n");
 	scanf("%d",&(temp->tre.hos.deposit));
 	int price = 200 * (date_turn(temp->tre.hos.time_end) - date_turn(temp->tre.hos.time_start));
+	if (price < 1000)
+		price = 1000;
 	while (temp->tre.hos.deposit < price)
 	{
 		printf("押金不足！至少应缴纳押金%d元，请重新输入\n", price);
@@ -314,7 +319,7 @@ void outsub_doc(struct record* head)   //科室检索
 
 void outname_doc(struct record* head)  //医生工号检索
 {
-	int num;
+	int num, x = 0;
 	record* p = head; 
 	printf("请输入需要查询的医生工号\n");
 	scanf("%d", &num);
@@ -323,11 +328,14 @@ void outname_doc(struct record* head)  //医生工号检索
 		if (p->doc.num_work == num)
 		{
 			singleprint(p);
+			x++;
 			p = p->next;
 		}
 		else
 			p = p->next;
 	}
+	if (x == 0)
+		printf("未搜索到该工号！\n");
 }
 
 

@@ -25,7 +25,7 @@ struct doctor {									//医生信息结构体
 
 struct check {									//检查结构体
 	int tag_check=0;                              //检查总项目数
-	char type[50][10];                          //检查类型
+	char type[50][20];                          //检查类型
 	float cost_term[50];					    //单项检查费用
 	float cost_check;							//总检查费用（函数计算）
 };
