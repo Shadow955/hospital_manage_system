@@ -352,7 +352,7 @@ void stdprint(record* p)
 void docprint(doctor* p)
 {
 	printf("\n---------------------------------------------------------------------------\n");
-	while (p->next!= NULL)
+	while (p != NULL)
 	{
 		printf("%-25s%-12s%-10s%-10d", p->name_doc, p->level, p->sub, p->num_work);
 		printf("现在接诊人数：%d人\n", p->state);

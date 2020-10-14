@@ -21,7 +21,7 @@ int main() {
 	pill_term* pill_head = link_pill();
 	che_term* che_head = link_che();
 	doctor* doc_head = link_doc();
-	record* rec_head = read_and_link(doc_head);  //读入源文件中现有的所有诊疗记录并生成一条链表
+	record* rec_head = read_and_link(doc_head);  //读入源文件中现有的所有诊疗记录并生成四条链表
 	record* p;
 	int number;
 	printf("请输入要执行功能对应的数字：\n");
